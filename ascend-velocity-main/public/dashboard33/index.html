@@ -1,0 +1,2808 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Gestão de Afiliadas</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/codelet/vendor/tailwind.js"></script>
+  <link href="/codelet/vendor/inter.css" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #9b184e 0%, #e75761 100%);
+    }
+    
+    .gradient-card {
+      background: linear-gradient(135deg, rgba(155, 24, 78, 0.1) 0%, rgba(231, 87, 97, 0.1) 100%);
+    }
+    
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .card-shadow {
+      box-shadow: 0 4px 20px rgba(155, 24, 78, 0.1);
+    }
+    
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(155, 24, 78, 0.2);
+    }
+    
+    .calendar-day {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .calendar-day:hover {
+      transform: scale(1.1);
+    }
+    
+    .status-postou-vendas {
+      background: linear-gradient(135deg, #059669, #10B981);
+      color: white;
+      opacity: 1 !important;
+      display: inline-block !important;
+      visibility: visible !important;
+    }
+    
+    .status-postou {
+      background: linear-gradient(135deg, #F59E0B, #FCD34D);
+      color: white;
+      opacity: 1 !important;
+      display: inline-block !important;
+      visibility: visible !important;
+    }
+    
+    .status-nao-postou {
+      background: linear-gradient(135deg, #EF4444, #F87171);
+      color: white;
+      opacity: 1 !important;
+      display: inline-block !important;
+      visibility: visible !important;
+    }
+    
+    .status-sem-analise {
+      background: linear-gradient(135deg, #6B7280, #9CA3AF);
+      color: white;
+      opacity: 1 !important;
+      display: inline-block !important;
+      visibility: visible !important;
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, #9b184e, #e75761);
+      border-radius: 10px;
+      height: 8px;
+    }
+    
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.4);
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-fade-in {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .chart-bar {
+      background: linear-gradient(180deg, #9b184e, #e75761);
+      border-radius: 4px 4px 0 0;
+      transition: all 0.3s ease;
+    }
+    
+    .chart-bar:hover {
+      transform: scaleY(1.05);
+    }
+    
+    .badge-bronze {
+      background: linear-gradient(135deg, #CD7F32, #E6A85C);
+      color: white;
+    }
+    
+    .badge-prata {
+      background: linear-gradient(135deg, #C0C0C0, #E8E8E8);
+      color: #333;
+    }
+    
+    .badge-ouro {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #333;
+    }
+    
+    .badge-diamante {
+      background: linear-gradient(135deg, #B9F2FF, #00BFFF);
+      color: #333;
+    }
+    
+    .nivel-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .streak-fire {
+      background: linear-gradient(135deg, #FF6B35, #F7931E);
+      color: white;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    .xp-bar {
+      background: linear-gradient(90deg, #4ade80, #22c55e);
+      border-radius: 10px;
+      height: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .xp-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="min-h-full">
+  <div id="app" class="min-h-full"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#f8fafc",
+      card_color: "#ffffff",
+      text_color: "#1e293b",
+      primary_color: "#9b184e",
+      accent_color: "#e75761",
+      font_family: "Inter",
+      font_size: 16,
+      titulo_principal: "Painel de Gestão de Afiliados - Aylle Duarte",
+      subtitulo: "Acompanhe o desempenho dos seus afiliados em tempo real",
+      empresa: "Aylle Duarte"
+    };
+
+    let afiliadas = [];
+    let registros = [];
+    let metricas = [];
+    let isLoading = false;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let selectedAfiliada = null;
+    let editingAfiliada = null;
+    let editingMeta = null;
+    let filtroAfiliada = 'todas';
+    let modoVisualizacao = 'grade';
+    let confirmandoExclusao = null;
+    let abaSelecionada = 'dashboard'; // 'dashboard', 'gamificacao', 'metricas'
+    let filtroNomeAfiliada = '';
+    let mesVisualizacao = new Date().getMonth();
+    let anoVisualizacao = new Date().getFullYear();
+    let editandoTitulo = false;
+
+    // Sistema de Gamificação
+    const NIVEIS = {
+      1: { nome: 'Aprendiz', pontos: 0, cor: '#94a3b8' },
+      2: { nome: 'Experiente', pontos: 100, cor: '#f59e0b' },
+      3: { nome: 'Mestre', pontos: 300, cor: '#10b981' },
+      4: { nome: 'Lenda', pontos: 500, cor: '#9b184e' }
+    };
+
+    const BADGES = {
+      'streak_5': { nome: 'Sequência de 5', emoji: '🔥', descricao: '5 dias consecutivos postando', pontos: 50 },
+      'streak_15': { nome: 'Sequência de 15', emoji: '🚀', descricao: '15 dias consecutivos postando', pontos: 80 },
+      'meta_100': { nome: 'Meta Cumprida', emoji: '🎯', descricao: 'Atingiu 100% da meta mensal', pontos: 100 },
+      'comeback': { nome: 'Volta por Cima', emoji: '🦅', descricao: 'Voltou a postar após 5+ dias parados', pontos: 20 }
+    };
+
+    const PONTOS = {
+      postou: 10,
+      postou_vendas: 15
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        // Separar dados por tipo
+        afiliadas = data.filter(item => item.nome && item.instagram && !item.afiliada_id);
+        registros = data.filter(item => item.afiliada_id && item.data && item.status);
+        metricas = data.filter(item => item.afiliada_id && item.mes_ano);
+        renderApp();
+      }
+    };
+
+    async function initApp() {
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        console.error("Erro ao inicializar SDK");
+      }
+    }
+
+    function calcularNivel(pontos) {
+      let nivel = 1;
+      for (let n = 4; n >= 1; n--) {
+        if (pontos >= NIVEIS[n].pontos) {
+          nivel = n;
+          break;
+        }
+      }
+      return nivel;
+    }
+
+    function calcularXPParaProximoNivel(pontos) {
+      const nivelAtual = calcularNivel(pontos);
+      if (nivelAtual >= 4) return { atual: pontos, proximo: pontos, progresso: 100 };
+      
+      const pontosNivelAtual = NIVEIS[nivelAtual].pontos;
+      const pontosProximoNivel = NIVEIS[nivelAtual + 1].pontos;
+      const progresso = ((pontos - pontosNivelAtual) / (pontosProximoNivel - pontosNivelAtual)) * 100;
+      
+      return {
+        atual: pontos - pontosNivelAtual,
+        proximo: pontosProximoNivel - pontosNivelAtual,
+        progresso: Math.min(progresso, 100)
+      };
+    }
+
+    function calcularStreak(afiliadaId) {
+      const hoje = new Date();
+      let streakAtual = 0;
+      let melhorStreak = 0;
+      
+      // Ordenar registros por data (mais recente primeiro)
+      const registrosAfiliada = registros
+        .filter(r => r.afiliada_id === afiliadaId && (r.status === 'postou' || r.status === 'postou_vendas'))
+        .sort((a, b) => new Date(b.data) - new Date(a.data));
+      
+      if (registrosAfiliada.length === 0) return { atual: 0, melhor: 0 };
+      
+      // Calcular streak atual (a partir de hoje, voltando no tempo)
+      let dataAtual = new Date(hoje);
+      let diasConsecutivos = 0;
+      
+      for (let i = 0; i < 365; i++) { // Verificar até 1 ano atrás
+        const dataStr = dataAtual.toISOString().split('T')[0];
+        const dayOfWeek = dataAtual.getDay();
+        const temPostagem = registrosAfiliada.some(r => r.data === dataStr);
+        
+        // Se é fim de semana (sábado ou domingo)
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          // Fins de semana não quebram o streak, apenas continuam
+          // Só conta para o streak se foi explicitamente marcado como postou
+          if (temPostagem) {
+            diasConsecutivos++;
+          }
+          // Se não postou no fim de semana, não quebra o streak (neutro)
+        } else {
+          // É dia útil
+          if (temPostagem) {
+            diasConsecutivos++;
+          } else {
+            // Se não postou em dia útil, quebra o streak
+            if (i === 0) {
+              // Se não postou hoje, streak atual é 0
+              break;
+            } else if (diasConsecutivos > 0) {
+              // Quebrou o streak
+              break;
+            }
+          }
+        }
+        
+        dataAtual.setDate(dataAtual.getDate() - 1);
+      }
+      
+      streakAtual = diasConsecutivos;
+      
+      // Calcular melhor streak histórico
+      const todasDatas = registrosAfiliada.map(r => new Date(r.data)).sort((a, b) => a - b);
+      let streakTemp = 0;
+      let melhorStreakTemp = 0;
+      
+      for (let i = 0; i < todasDatas.length; i++) {
+        if (i === 0) {
+          streakTemp = 1;
+        } else {
+          const dataAnterior = todasDatas[i - 1];
+          const dataAtual = todasDatas[i];
+          const diffDias = (dataAtual - dataAnterior) / (1000 * 60 * 60 * 24);
+          
+          // Verificar se há dias entre as datas
+          if (diffDias === 1) {
+            // Dias consecutivos
+            streakTemp++;
+          } else if (diffDias > 1) {
+            // Verificar se os dias no meio são apenas fins de semana
+            let somenteFinsDeSemana = true;
+            let dataVerificacao = new Date(dataAnterior);
+            dataVerificacao.setDate(dataVerificacao.getDate() + 1);
+            
+            while (dataVerificacao < dataAtual) {
+              const dayOfWeek = dataVerificacao.getDay();
+              if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                // Encontrou um dia útil no meio, quebra o streak
+                somenteFinsDeSemana = false;
+                break;
+              }
+              dataVerificacao.setDate(dataVerificacao.getDate() + 1);
+            }
+            
+            if (somenteFinsDeSemana) {
+              // Apenas fins de semana no meio, continua o streak
+              streakTemp++;
+            } else {
+              // Havia dias úteis no meio, reinicia o streak
+              melhorStreakTemp = Math.max(melhorStreakTemp, streakTemp);
+              streakTemp = 1;
+            }
+          }
+        }
+        
+        melhorStreakTemp = Math.max(melhorStreakTemp, streakTemp);
+      }
+      
+      melhorStreak = Math.max(melhorStreakTemp, streakAtual);
+      
+      return { atual: streakAtual, melhor: melhorStreak };
+    }
+
+    function verificarBadges(afiliadaId) {
+      const registrosAfiliada = registros.filter(r => r.afiliada_id === afiliadaId && r.status === 'postou');
+      const metricaAfiliada = metricas.find(m => m.afiliada_id === afiliadaId && m.mes_ano === `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`);
+      const streak = calcularStreak(afiliadaId);
+      
+      const badgesConquistadas = [];
+      
+      // Badges de streak - só pode ganhar uma vez por mês cada badge
+      const mesAno = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const badgesDoMes = verificarBadgesMes(afiliadaId, currentMonth, currentYear);
+      
+      // Verificar badges de streak do mês atual
+      const afiliada = afiliadas.find(a => a.id === afiliadaId);
+      const badgesMes = afiliada && afiliada.badges_mes ? JSON.parse(afiliada.badges_mes) : {};
+      const badgesJaConquistadas = badgesMes[mesAno] ? badgesMes[mesAno].split(',').filter(b => b) : [];
+      
+      // Streak de 5 dias - só pode conquistar uma vez por mês
+      if (streak.melhor >= 5 && !badgesJaConquistadas.includes('streak_5')) {
+        badgesConquistadas.push('streak_5');
+      }
+      
+      // Streak de 15 dias - só pode conquistar se já tiver conquistado streak_5 no mesmo mês
+      if (streak.melhor >= 15 && 
+          (badgesJaConquistadas.includes('streak_5') || badgesConquistadas.includes('streak_5')) &&
+          !badgesJaConquistadas.includes('streak_15')) {
+        badgesConquistadas.push('streak_15');
+      }
+      
+      // Badge de meta (se existir meta definida)
+      if (metricaAfiliada && metricaAfiliada.meta_mensal > 0) {
+        const percentualMeta = (metricaAfiliada.postagens_mes / metricaAfiliada.meta_mensal) * 100;
+        if (percentualMeta >= 100) badgesConquistadas.push('meta_100');
+      }
+      
+      // Badge Volta por Cima - verifica se voltou a postar após 5+ dias parados
+      if (verificarVoltaPorCima(afiliadaId)) {
+        badgesConquistadas.push('comeback');
+      }
+      
+      return badgesConquistadas;
+    }
+
+    function verificarVoltaPorCima(afiliadaId) {
+      const registrosAfiliada = registros
+        .filter(r => r.afiliada_id === afiliadaId && (r.status === 'postou' || r.status === 'postou_vendas'))
+        .sort((a, b) => new Date(a.data) - new Date(b.data));
+      
+      if (registrosAfiliada.length < 2) return false;
+      
+      for (let i = 1; i < registrosAfiliada.length; i++) {
+        const dataAnterior = new Date(registrosAfiliada[i - 1].data);
+        const dataAtual = new Date(registrosAfiliada[i].data);
+        const diffDias = (dataAtual - dataAnterior) / (1000 * 60 * 60 * 24);
+        
+        // Se passou exatamente 5 ou mais dias sem postar e depois voltou a postar
+        // Só ganha se fizer postagem no dia 5 em diante (não antes)
+        if (diffDias >= 5) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+
+    function verificarBadgesMes(afiliadaId, mes, ano) {
+      const registrosDoMes = registros.filter(r => {
+        if (r.afiliada_id !== afiliadaId || (r.status !== 'postou' && r.status !== 'postou_vendas')) return false;
+        const dataRegistro = new Date(r.data);
+        return dataRegistro.getMonth() === mes && dataRegistro.getFullYear() === ano;
+      });
+      
+      const mesAno = `${ano}-${String(mes + 1).padStart(2, '0')}`;
+      const metricaAfiliada = metricas.find(m => m.afiliada_id === afiliadaId && m.mes_ano === mesAno);
+      const streakDoMes = calcularStreakMes(afiliadaId, mes, ano);
+      
+      const badgesConquistadas = [];
+      
+      // Sistema de badges progressivo - só pode ganhar uma vez por mês cada badge
+      // Verificar se já tem badges conquistadas armazenadas na afiliada
+      const afiliada = afiliadas.find(a => a.id === afiliadaId);
+      const badgesJaConquistadas = afiliada && afiliada.badges_mes && afiliada.badges_mes[mesAno] 
+        ? afiliada.badges_mes[mesAno].split(',').filter(b => b) 
+        : [];
+      
+      // Streak de 5 dias - só pode conquistar uma vez por mês
+      if (streakDoMes.melhor >= 5 && !badgesJaConquistadas.includes('streak_5')) {
+        badgesConquistadas.push('streak_5');
+      }
+      
+      // Streak de 15 dias - só pode conquistar se já tiver conquistado streak_5 no mesmo mês
+      if (streakDoMes.melhor >= 15 && 
+          (badgesJaConquistadas.includes('streak_5') || badgesConquistadas.includes('streak_5')) &&
+          !badgesJaConquistadas.includes('streak_15')) {
+        badgesConquistadas.push('streak_15');
+      }
+      
+      // Badge de meta (se existir meta definida)
+      if (metricaAfiliada && metricaAfiliada.meta_mensal > 0) {
+        const percentualMeta = (metricaAfiliada.postagens_mes / metricaAfiliada.meta_mensal) * 100;
+        if (percentualMeta >= 100 && !badgesJaConquistadas.includes('meta_100')) {
+          badgesConquistadas.push('meta_100');
+        }
+      }
+      
+      // Badge Volta por Cima - verifica se voltou a postar após 5+ dias parados no mês
+      if (verificarVoltaPorCimaMes(afiliadaId, mes, ano) && !badgesJaConquistadas.includes('comeback')) {
+        badgesConquistadas.push('comeback');
+      }
+      
+      // Retornar todas as badges do mês (já conquistadas + novas)
+      return [...badgesJaConquistadas, ...badgesConquistadas];
+    }
+
+    function calcularStreakMes(afiliadaId, mes, ano) {
+      const registrosDoMes = registros
+        .filter(r => {
+          if (r.afiliada_id !== afiliadaId || (r.status !== 'postou' && r.status !== 'postou_vendas')) return false;
+          const dataRegistro = new Date(r.data);
+          return dataRegistro.getMonth() === mes && dataRegistro.getFullYear() === ano;
+        })
+        .sort((a, b) => new Date(a.data) - new Date(b.data));
+      
+      if (registrosDoMes.length === 0) return { atual: 0, melhor: 0 };
+      
+      let melhorStreak = 0;
+      let streakTemp = 0;
+      
+      const todasDatas = registrosDoMes.map(r => new Date(r.data)).sort((a, b) => a - b);
+      
+      for (let i = 0; i < todasDatas.length; i++) {
+        if (i === 0) {
+          streakTemp = 1;
+        } else {
+          const dataAnterior = todasDatas[i - 1];
+          const dataAtual = todasDatas[i];
+          const diffDias = (dataAtual - dataAnterior) / (1000 * 60 * 60 * 24);
+          
+          // Verificar se há dias entre as datas
+          if (diffDias === 1) {
+            // Dias consecutivos
+            streakTemp++;
+          } else if (diffDias > 1) {
+            // Verificar se os dias no meio são apenas fins de semana
+            let somenteFinsDeSemana = true;
+            let dataVerificacao = new Date(dataAnterior);
+            dataVerificacao.setDate(dataVerificacao.getDate() + 1);
+            
+            while (dataVerificacao < dataAtual) {
+              const dayOfWeek = dataVerificacao.getDay();
+              if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                // Encontrou um dia útil no meio, quebra o streak
+                somenteFinsDeSemana = false;
+                break;
+              }
+              dataVerificacao.setDate(dataVerificacao.getDate() + 1);
+            }
+            
+            if (somenteFinsDeSemana) {
+              // Apenas fins de semana no meio, continua o streak
+              streakTemp++;
+            } else {
+              // Havia dias úteis no meio, reinicia o streak
+              melhorStreak = Math.max(melhorStreak, streakTemp);
+              streakTemp = 1;
+            }
+          }
+        }
+        
+        melhorStreak = Math.max(melhorStreak, streakTemp);
+      }
+      
+      // Para streak atual, verificar se a última postagem foi recente no contexto do mês
+      const ultimaPostagem = new Date(registrosDoMes[registrosDoMes.length - 1].data);
+      const ultimoDiaDoMes = new Date(ano, mes + 1, 0); // Último dia do mês
+      const hoje = new Date();
+      
+      // Se estamos no mês atual, usar hoje como referência
+      // Se é mês passado, usar o último dia do mês
+      const dataReferencia = (mes === hoje.getMonth() && ano === hoje.getFullYear()) ? hoje : ultimoDiaDoMes;
+      const diffUltimaPostagem = (dataReferencia - ultimaPostagem) / (1000 * 60 * 60 * 24);
+      
+      // Considerar streak atual se a última postagem foi há no máximo 3 dias (considerando fins de semana)
+      const streakAtualFinal = diffUltimaPostagem <= 3 ? streakTemp : 0;
+      
+      return { atual: streakAtualFinal, melhor: melhorStreak };
+    }
+
+    function verificarVoltaPorCimaMes(afiliadaId, mes, ano) {
+      const registrosDoMes = registros
+        .filter(r => {
+          if (r.afiliada_id !== afiliadaId || (r.status !== 'postou' && r.status !== 'postou_vendas')) return false;
+          const dataRegistro = new Date(r.data);
+          return dataRegistro.getMonth() === mes && dataRegistro.getFullYear() === ano;
+        })
+        .sort((a, b) => new Date(a.data) - new Date(b.data));
+      
+      if (registrosDoMes.length < 2) return false;
+      
+      for (let i = 1; i < registrosDoMes.length; i++) {
+        const dataAnterior = new Date(registrosDoMes[i - 1].data);
+        const dataAtual = new Date(registrosDoMes[i].data);
+        const diffDias = (dataAtual - dataAnterior) / (1000 * 60 * 60 * 24);
+        
+        if (diffDias >= 5) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+
+    function calcularDiasUteis(month, year) {
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let diasUteis = 0;
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dayOfWeek = date.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Não é domingo (0) nem sábado (6)
+          diasUteis++;
+        }
+      }
+      
+      return diasUteis;
+    }
+
+    function ehFimDeSemana(day, month, year) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      return dayOfWeek === 0 || dayOfWeek === 6; // Domingo (0) ou Sábado (6)
+    }
+
+    async function atualizarPontuacaoAfiliada(afiliadaId) {
+      const registrosPostou = registros.filter(r => r.afiliada_id === afiliadaId && r.status === 'postou');
+      const registrosPostouVendas = registros.filter(r => r.afiliada_id === afiliadaId && r.status === 'postou_vendas');
+      
+      // Calcular pontos base das postagens
+      let pontos = (registrosPostou.length * PONTOS.postou) + (registrosPostouVendas.length * PONTOS.postou_vendas);
+      
+      // Calcular badges conquistadas no mês atual
+      const mesAno = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const badgesDoMes = verificarBadgesMes(afiliadaId, currentMonth, currentYear);
+      
+      // Adicionar pontos das badges conquistadas no mês atual
+      badgesDoMes.forEach(badgeId => {
+        const badge = BADGES[badgeId];
+        if (badge && badge.pontos) {
+          pontos += badge.pontos;
+        }
+      });
+      
+      const nivel = calcularNivel(pontos);
+      const streak = calcularStreak(afiliadaId);
+      
+      // Atualizar dados da afiliada
+      const afiliada = afiliadas.find(a => a.id === afiliadaId);
+      if (afiliada) {
+        // Preparar objeto de badges por mês
+        const badgesMes = afiliada.badges_mes ? JSON.parse(afiliada.badges_mes) : {};
+        badgesMes[mesAno] = badgesDoMes.join(',');
+        
+        const afiliadaAtualizada = {
+          ...afiliada,
+          pontos: pontos,
+          nivel: nivel,
+          badges: badgesDoMes.join(','), // Badges do mês atual
+          badges_mes: JSON.stringify(badgesMes), // Histórico de badges por mês
+          streak_atual: streak.atual,
+          melhor_streak: streak.melhor
+        };
+        
+        await window.dataSdk.update(afiliadaAtualizada);
+      }
+    }
+
+    async function definirMetaMensal(afiliadaId, meta) {
+      const mesAno = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const metricaExistente = metricas.find(m => m.afiliada_id === afiliadaId && m.mes_ano === mesAno);
+      
+      const postagensDoMes = registros.filter(r => {
+        if (r.afiliada_id !== afiliadaId || (r.status !== 'postou' && r.status !== 'postou_vendas')) return false;
+        const dataRegistro = new Date(r.data);
+        return dataRegistro.getMonth() === currentMonth && dataRegistro.getFullYear() === currentYear;
+      }).length;
+      
+      if (metricaExistente) {
+        const metricaAtualizada = {
+          ...metricaExistente,
+          meta_mensal: meta,
+          postagens_mes: postagensDoMes
+        };
+        return await window.dataSdk.update(metricaAtualizada);
+      } else {
+        return await window.dataSdk.create({
+          id: `metrica_${afiliadaId}_${mesAno}`,
+          afiliada_id: afiliadaId,
+          mes_ano: mesAno,
+          meta_mensal: meta,
+          postagens_mes: postagensDoMes,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    function abrirModalMeta(afiliadaId) {
+      const afiliada = afiliadas.find(a => a.id === afiliadaId);
+      const mesAno = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const metricaAtual = metricas.find(m => m.afiliada_id === afiliadaId && m.mes_ano === mesAno);
+      
+      editingMeta = {
+        afiliada: afiliada,
+        metaAtual: metricaAtual?.meta_mensal || 0
+      };
+      renderApp();
+    }
+
+    function cancelarEdicaoMeta() {
+      editingMeta = null;
+      renderApp();
+    }
+
+    function cancelarEdicaoTitulo() {
+      editandoTitulo = false;
+      renderApp();
+    }
+
+    async function salvarTitulo(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      const titulo = formData.get('titulo').trim();
+      const subtitulo = formData.get('subtitulo').trim();
+      
+      if (!titulo) {
+        mostrarMensagem("Título é obrigatório", "erro");
+        return;
+      }
+      
+      isLoading = true;
+      renderApp();
+      
+      await window.elementSdk.setConfig({ 
+        titulo_principal: titulo,
+        subtitulo: subtitulo 
+      });
+      
+      isLoading = false;
+      editandoTitulo = false;
+      mostrarMensagem("Título atualizado com sucesso!", "sucesso");
+      renderApp();
+    }
+
+    async function salvarMeta(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      const meta = parseInt(formData.get('meta')) || 0;
+      
+      if (meta < 0) {
+        mostrarMensagem("Meta deve ser um número positivo", "erro");
+        return;
+      }
+      
+      isLoading = true;
+      renderApp();
+      
+      const result = await definirMetaMensal(editingMeta.afiliada.id, meta);
+      
+      isLoading = false;
+      
+      if (result.isOk) {
+        editingMeta = null;
+        mostrarMensagem("Meta mensal definida com sucesso!", "sucesso");
+        // Atualizar pontuação após definir meta
+        await atualizarPontuacaoAfiliada(editingMeta?.afiliada.id);
+      } else {
+        mostrarMensagem("Erro ao definir meta mensal.", "erro");
+      }
+      
+      renderApp();
+    }
+
+    // Funções existentes (getDaysInMonth, getFirstDayOfMonth, etc.) permanecem iguais...
+    function getDaysInMonth(month, year) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(month, year) {
+      return new Date(year, month, 1).getDay();
+    }
+
+    function formatDate(day, month, year) {
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function getStatusForDay(afiliadaId, day, month, year) {
+      const dateStr = formatDate(day, month, year);
+      const registro = registros.find(r => r.afiliada_id === afiliadaId && r.data === dateStr);
+      
+      // Se existe registro, retorna o status
+      if (registro) {
+        return registro.status;
+      }
+      
+      // Se não existe registro, verificar se é fim de semana
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      
+      // Sábado (6) ou Domingo (0) = "sem_analise" por padrão
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        return 'sem_analise';
+      }
+      
+      // Dias úteis sem registro = null
+      return null;
+    }
+
+    function calcularEstatisticasAfiliada(afiliadaId, month, year) {
+      const daysInMonth = getDaysInMonth(month, year);
+      let postou = 0;
+      let naoPostou = 0;
+      let semAnalise = 0;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const status = getStatusForDay(afiliadaId, day, month, year);
+        if (status === 'postou' || status === 'postou_vendas') postou++;
+        else if (status === 'nao_postou') naoPostou++;
+        else if (status === 'sem_analise') semAnalise++;
+      }
+
+      // Para cálculo de taxa de cumprimento, fins de semana não contam como "analisados"
+      // a menos que tenham sido explicitamente marcados como "postou" ou "nao_postou"
+      let diasUteisAnalisados = 0;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dayOfWeek = date.getDay();
+        const status = getStatusForDay(afiliadaId, day, month, year);
+        
+        // Contar como analisado se:
+        // 1. É dia útil e tem qualquer status (postou, nao_postou, sem_analise)
+        // 2. É fim de semana mas foi explicitamente marcado como postou ou nao_postou
+        if ((dayOfWeek !== 0 && dayOfWeek !== 6) || 
+            (status === 'postou' || status === 'postou_vendas' || status === 'nao_postou')) {
+          if (status === 'postou' || status === 'postou_vendas' || status === 'nao_postou') {
+            diasUteisAnalisados++;
+          }
+        }
+      }
+
+      const taxaCumprimento = diasUteisAnalisados > 0 ? (postou / diasUteisAnalisados) * 100 : 0;
+
+      return { postou, naoPostou, semAnalise, taxaCumprimento };
+    }
+
+    function calcularKPIs() {
+      if (afiliadas.length === 0) return {
+        totalAfiliadas: 0,
+        taxaMedia: 0,
+        afiliadosInativos: 0,
+        diasSemPostagem: 0,
+        afiliadaDestaque: null
+      };
+
+      const stats = afiliadas.map(a => ({
+        ...a,
+        ...calcularEstatisticasAfiliada(a.id, currentMonth, currentYear)
+      }));
+
+      const validStats = stats.filter(s => s.taxaCumprimento > 0);
+      const taxaMedia = validStats.length > 0 ? 
+        validStats.reduce((sum, s) => sum + s.taxaCumprimento, 0) / validStats.length : 0;
+
+      // Calcular afiliados inativos (que nunca postaram)
+      const afiliadosInativos = afiliadas.filter(afiliada => {
+        const registrosAfiliada = registros.filter(r => r.afiliada_id === afiliada.id && (r.status === 'postou' || r.status === 'postou_vendas'));
+        return registrosAfiliada.length === 0;
+      }).length;
+
+      const totalDiasSemPostagem = validStats.reduce((sum, s) => sum + s.naoPostou, 0);
+
+      const afiliadaDestaque = validStats.length > 0 ? 
+        validStats.reduce((prev, current) => 
+          current.taxaCumprimento > prev.taxaCumprimento ? current : prev
+        ) : null;
+
+      return {
+        totalAfiliadas: afiliadas.length,
+        taxaMedia,
+        afiliadosInativos,
+        diasSemPostagem: totalDiasSemPostagem,
+        afiliadaDestaque
+      };
+    }
+
+    async function adicionarAfiliada(event) {
+      event.preventDefault();
+      
+      if (afiliadas.length >= 999) {
+        mostrarMensagem("Limite de 999 afiliadas atingido.", "erro");
+        return;
+      }
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      
+      const nome = formData.get('nome').trim();
+      const instagram = formData.get('instagram').trim();
+      const linkInstagram = formData.get('link_instagram').trim();
+      const observacoes = formData.get('observacoes').trim();
+      
+      if (!nome || !instagram) {
+        mostrarMensagem("Nome e Instagram são obrigatórios", "erro");
+        return;
+      }
+      
+      isLoading = true;
+      renderApp();
+      
+      const result = await window.dataSdk.create({
+        id: Date.now().toString(),
+        nome,
+        instagram,
+        link_instagram: linkInstagram,
+        observacoes,
+        pontos: 0,
+        nivel: 1,
+        badges: '',
+        streak_atual: 0,
+        melhor_streak: 0,
+        created_at: new Date().toISOString()
+      });
+      
+      isLoading = false;
+      
+      if (result.isOk) {
+        form.reset();
+        mostrarMensagem("Afiliada adicionada com sucesso!", "sucesso");
+      } else {
+        mostrarMensagem("Erro ao adicionar afiliada.", "erro");
+      }
+      
+      renderApp();
+    }
+
+    async function marcarDia(day, status) {
+      if (!selectedAfiliada) return;
+      
+      const dateStr = formatDate(day, currentMonth, currentYear);
+      const registroExistente = registros.find(r => 
+        r.afiliada_id === selectedAfiliada.id && r.data === dateStr
+      );
+      
+      // Fechar menu imediatamente para melhor UX
+      document.querySelectorAll('[id^="day-menu-"]').forEach(menu => {
+        menu.classList.add('hidden');
+      });
+      
+      // Mostrar loading apenas no botão específico
+      const dayButton = document.querySelector(`button[onclick*="toggleDayMenu(${day})"]`);
+      if (dayButton) {
+        dayButton.style.opacity = '0.6';
+        dayButton.style.pointerEvents = 'none';
+        dayButton.innerHTML = '⏳';
+      }
+      
+      let result;
+      
+      try {
+        if (registroExistente) {
+          if (status === null) {
+            result = await window.dataSdk.delete(registroExistente);
+          } else {
+            const registroAtualizado = { ...registroExistente, status };
+            result = await window.dataSdk.update(registroAtualizado);
+          }
+        } else if (status !== null) {
+          result = await window.dataSdk.create({
+            id: `registro_${Date.now()}`,
+            afiliada_id: selectedAfiliada.id,
+            data: dateStr,
+            status,
+            created_at: new Date().toISOString()
+          });
+        }
+        
+        if (result && result.isOk) {
+          // Atualizar apenas o botão específico sem re-renderizar tudo
+          if (dayButton) {
+            let statusClass = 'bg-gray-100 text-gray-700';
+            let dayContent = day;
+            
+            if (status === 'postou') {
+              statusClass = 'status-postou';
+            } else if (status === 'postou_vendas') {
+              statusClass = 'status-postou-vendas';
+            } else if (status === 'nao_postou') {
+              statusClass = 'status-nao-postou';
+            } else if (status === 'sem_analise') {
+              statusClass = 'status-sem-analise';
+            }
+            
+            dayButton.className = `calendar-day w-full aspect-square rounded-xl flex items-center justify-center ${statusClass}`;
+            dayButton.innerHTML = dayContent;
+            dayButton.style.opacity = '1';
+            dayButton.style.pointerEvents = 'auto';
+          }
+          
+          // Atualizar pontuação em background (sem bloquear UI)
+          setTimeout(async () => {
+            await atualizarPontuacaoAfiliada(selectedAfiliada.id);
+            await atualizarMetricaMensal(selectedAfiliada.id);
+          }, 100);
+          
+          // Mostrar feedback sutil
+          mostrarMensagemRapida("✅ Atualizado!");
+          
+        } else if (result && !result.isOk) {
+          mostrarMensagem("Erro ao atualizar status", "erro");
+          // Restaurar botão em caso de erro
+          if (dayButton) {
+            dayButton.style.opacity = '1';
+            dayButton.style.pointerEvents = 'auto';
+            dayButton.innerHTML = day;
+          }
+        }
+      } catch (error) {
+        mostrarMensagem("Erro ao atualizar status", "erro");
+        // Restaurar botão em caso de erro
+        if (dayButton) {
+          dayButton.style.opacity = '1';
+          dayButton.style.pointerEvents = 'auto';
+          dayButton.innerHTML = day;
+        }
+      }
+    }
+
+    async function atualizarMetricaMensal(afiliadaId) {
+      const mesAno = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const metricaExistente = metricas.find(m => m.afiliada_id === afiliadaId && m.mes_ano === mesAno);
+      
+      // Contar apenas postagens que realmente valem pontos
+      const postagensDoMes = registros.filter(r => {
+        if (r.afiliada_id !== afiliadaId || (r.status !== 'postou' && r.status !== 'postou_vendas')) return false;
+        const dataRegistro = new Date(r.data);
+        if (dataRegistro.getMonth() !== currentMonth || dataRegistro.getFullYear() !== currentYear) return false;
+        
+        // Incluir todas as postagens que valem pontos (dias úteis + fins de semana explicitamente marcados)
+        return true;
+      }).length;
+      
+      if (metricaExistente) {
+        const metricaAtualizada = {
+          ...metricaExistente,
+          postagens_mes: postagensDoMes
+        };
+        await window.dataSdk.update(metricaAtualizada);
+      } else {
+        await window.dataSdk.create({
+          id: `metrica_${afiliadaId}_${mesAno}`,
+          afiliada_id: afiliadaId,
+          mes_ano: mesAno,
+          meta_mensal: 0,
+          postagens_mes: postagensDoMes,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    function abrirCalendario(afiliada) {
+      selectedAfiliada = afiliada;
+      renderApp();
+    }
+
+    function fecharCalendario() {
+      selectedAfiliada = null;
+      renderApp();
+    }
+
+    function navegarMes(direction) {
+      if (direction === 'prev') {
+        if (currentMonth === 0) {
+          currentMonth = 11;
+          currentYear--;
+        } else {
+          currentMonth--;
+        }
+      } else {
+        if (currentMonth === 11) {
+          currentMonth = 0;
+          currentYear++;
+        } else {
+          currentMonth++;
+        }
+      }
+      renderApp();
+    }
+
+    function navegarMesMetricas(direction) {
+      if (direction === 'prev') {
+        if (mesVisualizacao === 0) {
+          mesVisualizacao = 11;
+          anoVisualizacao--;
+        } else {
+          mesVisualizacao--;
+        }
+      } else {
+        if (mesVisualizacao === 11) {
+          mesVisualizacao = 0;
+          anoVisualizacao++;
+        } else {
+          mesVisualizacao++;
+        }
+      }
+      renderApp();
+    }
+
+    function filtrarAfiliadas(nome) {
+      filtroNomeAfiliada = nome.toLowerCase();
+      renderApp();
+    }
+
+    function obterAfiliadasFiltradas() {
+      if (!filtroNomeAfiliada) return afiliadas;
+      return afiliadas.filter(a => 
+        a.nome.toLowerCase().includes(filtroNomeAfiliada) || 
+        a.instagram.toLowerCase().includes(filtroNomeAfiliada)
+      );
+    }
+
+    function mostrarMensagem(texto, tipo) {
+      const container = document.getElementById('mensagens');
+      const mensagem = document.createElement('div');
+      mensagem.className = `p-4 rounded-xl mb-4 animate-fade-in ${tipo === 'erro' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200'}`;
+      mensagem.textContent = texto;
+      container.appendChild(mensagem);
+      
+      setTimeout(() => {
+        mensagem.style.opacity = '0';
+        setTimeout(() => mensagem.remove(), 300);
+      }, 4000);
+    }
+
+    function mostrarMensagemRapida(texto) {
+      const container = document.getElementById('mensagens');
+      const mensagem = document.createElement('div');
+      mensagem.className = 'p-3 rounded-xl mb-2 animate-fade-in bg-green-500 text-white font-semibold shadow-lg';
+      mensagem.textContent = texto;
+      mensagem.style.fontSize = '14px';
+      container.appendChild(mensagem);
+      
+      setTimeout(() => {
+        mensagem.style.opacity = '0';
+        mensagem.style.transform = 'translateY(-10px)';
+        setTimeout(() => mensagem.remove(), 200);
+      }, 1500);
+    }
+
+    function editarAfiliada(afiliadaId) {
+      const afiliada = afiliadas.find(a => a.id === afiliadaId);
+      if (afiliada) {
+        editingAfiliada = afiliada;
+        renderApp();
+      }
+    }
+
+    function cancelarEdicao() {
+      editingAfiliada = null;
+      renderApp();
+    }
+
+    async function salvarEdicao(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      
+      const nome = formData.get('nome').trim();
+      const instagram = formData.get('instagram').trim();
+      const linkInstagram = formData.get('link_instagram').trim();
+      const observacoes = formData.get('observacoes').trim();
+      
+      if (!nome || !instagram) {
+        mostrarMensagem("Nome e Instagram são obrigatórios", "erro");
+        return;
+      }
+      
+      isLoading = true;
+      renderApp();
+      
+      const afiliadaAtualizada = {
+        ...editingAfiliada,
+        nome,
+        instagram,
+        link_instagram: linkInstagram,
+        observacoes
+      };
+      
+      const result = await window.dataSdk.update(afiliadaAtualizada);
+      
+      isLoading = false;
+      
+      if (result.isOk) {
+        editingAfiliada = null;
+        mostrarMensagem("Afiliada atualizada com sucesso!", "sucesso");
+      } else {
+        mostrarMensagem("Erro ao atualizar afiliada.", "erro");
+      }
+      
+      renderApp();
+    }
+
+    function confirmarExclusao(afiliadaId, nomeAfiliada) {
+      confirmandoExclusao = { id: afiliadaId, nome: nomeAfiliada };
+      renderApp();
+    }
+
+    function cancelarExclusao() {
+      confirmandoExclusao = null;
+      renderApp();
+    }
+
+    async function excluirAfiliada() {
+      if (!confirmandoExclusao) return;
+      
+      isLoading = true;
+      renderApp();
+      
+      const afiliada = afiliadas.find(a => a.id === confirmandoExclusao.id);
+      if (!afiliada) {
+        isLoading = false;
+        mostrarMensagem("Afiliada não encontrada.", "erro");
+        return;
+      }
+      
+      // Excluir registros e métricas da afiliada
+      const registrosAfiliada = registros.filter(r => r.afiliada_id === confirmandoExclusao.id);
+      const metricasAfiliada = metricas.filter(m => m.afiliada_id === confirmandoExclusao.id);
+      
+      for (const registro of registrosAfiliada) {
+        await window.dataSdk.delete(registro);
+      }
+      
+      for (const metrica of metricasAfiliada) {
+        await window.dataSdk.delete(metrica);
+      }
+      
+      // Excluir a afiliada
+      const result = await window.dataSdk.delete(afiliada);
+      
+      isLoading = false;
+      confirmandoExclusao = null;
+      
+      if (result.isOk) {
+        mostrarMensagem("Afiliada excluída com sucesso!", "sucesso");
+        if (filtroAfiliada === afiliada.id) {
+          filtroAfiliada = 'todas';
+        }
+      } else {
+        mostrarMensagem("Erro ao excluir afiliada.", "erro");
+      }
+      
+      renderApp();
+    }
+
+    function toggleDayMenu(day) {
+      // Fechar todos os outros menus
+      document.querySelectorAll('[id^="day-menu-"]').forEach(menu => {
+        if (menu.id !== `day-menu-${day}`) {
+          menu.classList.add('hidden');
+        }
+      });
+      
+      const menu = document.getElementById(`day-menu-${day}`);
+      if (menu) {
+        menu.classList.toggle('hidden');
+      }
+    }
+
+    // Fechar menus ao clicar fora
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.calendar-day') && !event.target.closest('[id^="day-menu-"]')) {
+        document.querySelectorAll('[id^="day-menu-"]').forEach(menu => {
+          menu.classList.add('hidden');
+        });
+      }
+    });
+
+    function renderModalMeta() {
+      if (!editingMeta) return '';
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      return `
+        <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+          <div class="max-w-md w-full mx-4 glass-effect rounded-2xl p-8 card-shadow animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">🎯 Definir Meta Mensal</h3>
+              <button onclick="cancelarEdicaoMeta()" class="p-3 rounded-xl hover:bg-gray-100 transition-all" style="font-size: ${baseSize * 1.2}px;">✕</button>
+            </div>
+            
+            <div class="mb-6">
+              <h4 style="font-size: ${baseSize * 1.1}px; font-weight: 600; margin-bottom: 8px;">${editingMeta.afiliada.nome}</h4>
+              <p style="font-size: ${baseSize * 0.9}px; opacity: 0.7;">
+                ${new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            
+            <form onsubmit="salvarMeta(event)" class="space-y-4">
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Meta de Postagens</label>
+                <input type="number" name="meta" value="${editingMeta.metaAtual}" min="0" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.6; margin-top: 4px;">
+                  Quantas postagens essa afiliada deve fazer este mês?
+                </p>
+              </div>
+              
+              <div class="flex gap-3 pt-4">
+                <button type="button" onclick="cancelarEdicaoMeta()" class="flex-1 py-3 px-6 rounded-xl font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all" style="font-size: ${baseSize}px;">
+                  Cancelar
+                </button>
+                <button type="submit" ${isLoading ? 'disabled' : ''} class="flex-1 py-3 px-6 rounded-xl font-semibold gradient-bg text-white hover-lift transition-all" style="font-size: ${baseSize}px; opacity: ${isLoading ? '0.6' : '1'};">
+                  ${isLoading ? '⏳ Salvando...' : '🎯 Definir Meta'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModalEdicaoTitulo() {
+      if (!editandoTitulo) return '';
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      return `
+        <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+          <div class="max-w-md w-full mx-4 glass-effect rounded-2xl p-8 card-shadow animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">✏️ Editar Título do Dashboard</h3>
+              <button onclick="cancelarEdicaoTitulo()" class="p-3 rounded-xl hover:bg-gray-100 transition-all" style="font-size: ${baseSize * 1.2}px;">✕</button>
+            </div>
+            
+            <form onsubmit="salvarTitulo(event)" class="space-y-4">
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Título Principal</label>
+                <input type="text" name="titulo" value="${config.titulo_principal || defaultConfig.titulo_principal}" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;" placeholder="Ex: Painel de Gestão de Afiliados - Seu Nome">
+              </div>
+              
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Subtítulo</label>
+                <input type="text" name="subtitulo" value="${config.subtitulo || defaultConfig.subtitulo}" class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;" placeholder="Ex: Acompanhe o desempenho dos seus afiliados">
+              </div>
+              
+              <div class="flex gap-3 pt-4">
+                <button type="button" onclick="cancelarEdicaoTitulo()" class="flex-1 py-3 px-6 rounded-xl font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all" style="font-size: ${baseSize}px;">
+                  Cancelar
+                </button>
+                <button type="submit" ${isLoading ? 'disabled' : ''} class="flex-1 py-3 px-6 rounded-xl font-semibold gradient-bg text-white hover-lift transition-all" style="font-size: ${baseSize}px; opacity: ${isLoading ? '0.6' : '1'};">
+                  ${isLoading ? '⏳ Salvando...' : '💾 Salvar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGamificacao() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      // Calcular pontuação específica do mês selecionado
+      const afiliadasComPontos = afiliadas
+        .map(a => {
+          // Calcular pontos apenas do mês selecionado
+          const registrosDoMes = registros.filter(r => {
+            if (r.afiliada_id !== a.id) return false;
+            const dataRegistro = new Date(r.data);
+            return dataRegistro.getMonth() === mesVisualizacao && dataRegistro.getFullYear() === anoVisualizacao;
+          });
+          
+          const registrosPostou = registrosDoMes.filter(r => r.status === 'postou');
+          const registrosPostouVendas = registrosDoMes.filter(r => r.status === 'postou_vendas');
+          
+          // Calcular badges do mês
+          const badgesDoMes = verificarBadgesMes(a.id, mesVisualizacao, anoVisualizacao);
+          
+          // Calcular pontos do mês
+          let pontosDoMes = (registrosPostou.length * PONTOS.postou) + (registrosPostouVendas.length * PONTOS.postou_vendas);
+          
+          // Adicionar pontos das badges do mês
+          badgesDoMes.forEach(badgeId => {
+            const badge = BADGES[badgeId];
+            if (badge && badge.pontos) {
+              pontosDoMes += badge.pontos;
+            }
+          });
+          
+          const nivelDoMes = calcularNivel(pontosDoMes);
+          const streakDoMes = calcularStreakMes(a.id, mesVisualizacao, anoVisualizacao);
+          
+          return {
+            ...a,
+            pontos: pontosDoMes,
+            nivel: nivelDoMes,
+            badges: badgesDoMes,
+            streak_atual: streakDoMes.atual,
+            melhor_streak: streakDoMes.melhor,
+            registrosDoMes: registrosDoMes.length
+          };
+        })
+        .sort((a, b) => b.pontos - a.pontos);
+      
+      return `
+        <div class="space-y-8">
+          <!-- Controles e Filtros -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div>
+                <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 4px;">🏆 Sistema de Gamificação</h3>
+                <p style="font-size: ${baseSize * 0.9}px; opacity: 0.7;">Acompanhe pontuação, níveis e conquistas das suas afiliadas</p>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <!-- Navegação de Mês -->
+                <div class="flex items-center gap-2">
+                  <span style="font-size: ${baseSize * 0.9}px; font-weight: 500;">📅</span>
+                  <button onclick="navegarMesMetricas('prev')" class="p-2 rounded-lg gradient-bg text-white hover-lift">‹</button>
+                  <span style="font-size: ${baseSize * 1.1}px; font-weight: 600; min-width: 150px; text-align: center;">
+                    ${new Date(anoVisualizacao, mesVisualizacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onclick="navegarMesMetricas('next')" class="p-2 rounded-lg gradient-bg text-white hover-lift">›</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sistema de Pontuação -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow mb-8">
+            <h3 class="mb-4" style="font-size: ${baseSize * 1.5}px; font-weight: 700;">📋 Como Funciona a Pontuação</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
+                <div>
+                  <div style="font-size: ${baseSize * 1.1}px; font-weight: 600; color: #059669;">Postou Completo (Ganha 15 pontos)</div>
+                  <div style="font-size: ${baseSize * 0.9}px; opacity: 0.8;">Postou sobre o dia + sobre o produto</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+                <div>
+                  <div style="font-size: ${baseSize * 1.1}px; font-weight: 600; color: #D97706;">Atenção (Ganha 10 pontos)</div>
+                  <div style="font-size: ${baseSize * 0.9}px; opacity: 0.8;">Postou somente sobre o dia sem falar do produto / ou postou somente sobre o produto e não postou sobre o dia</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200">
+                <div>
+                  <div style="font-size: ${baseSize * 1.1}px; font-weight: 600; color: #DC2626;">Não postou</div>
+                  <div style="font-size: ${baseSize * 0.9}px; opacity: 0.8;">Não realizou postagem</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                <div>
+                  <div style="font-size: ${baseSize * 1.1}px; font-weight: 600; color: #6B7280;">Sem Análise</div>
+                  <div style="font-size: ${baseSize * 0.9}px; opacity: 0.8;">Dia neutro</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+              <div class="flex items-center gap-2 mb-2">
+                <span style="font-size: ${baseSize * 1.1}px;">💡</span>
+                <span style="font-size: ${baseSize * 0.95}px; font-weight: 600; color: #2563eb;">Dica:</span>
+              </div>
+              <p style="font-size: ${baseSize * 0.9}px; color: #1e40af;">
+                Complete conquistas para ganhar pontos extras! Cada conquista tem sua própria recompensa em pontos.
+              </p>
+            </div>
+          </div>
+          
+          <!-- Ranking de Pontuação -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700;">🏆 Ranking de Pontuação</h3>
+              <div class="text-right">
+                <p style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">
+                  ${new Date(anoVisualizacao, mesVisualizacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </p>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">Pontuação do mês selecionado</p>
+              </div>
+            </div>
+            
+            ${afiliadasComPontos.length > 0 ? `
+              <div class="space-y-4">
+                ${afiliadasComPontos.map((a, index) => {
+                  const xp = calcularXPParaProximoNivel(a.pontos);
+                  const nivelInfo = NIVEIS[a.nivel];
+                  
+                  return `
+                    <div class="flex items-center gap-4 p-4 rounded-xl gradient-card hover-lift">
+                      <!-- Posição -->
+                      <div class="flex items-center justify-center w-12 h-12 rounded-full gradient-bg text-white relative" style="font-size: ${baseSize * 1.1}px; font-weight: 700;">
+                        ${index + 1}
+                        ${index === 0 ? `<div class="absolute -top-2 -right-1" style="font-size: ${baseSize * 1.3}px;">👑</div>` : ''}
+                      </div>
+                      
+                      <!-- Info da Afiliada -->
+                      <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                          <h4 style="font-size: ${baseSize * 1.1}px; font-weight: 600;">${a.nome}</h4>
+                          <div class="nivel-badge" style="background: ${nivelInfo.cor};">
+                            ${a.nivel}
+                          </div>
+                          <span style="font-size: ${baseSize * 0.85}px; opacity: 0.7;">${nivelInfo.nome}</span>
+                        </div>
+                        
+                        <!-- Barra de XP -->
+                        <div class="mb-2">
+                          <div class="flex justify-between items-center mb-1">
+                            <span style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">XP: ${xp.atual}/${xp.proximo}</span>
+                            <span style="font-size: ${baseSize * 0.8}px; font-weight: 600;">${a.pontos} pts</span>
+                          </div>
+                          <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="xp-bar h-3 rounded-full" style="width: ${xp.progresso}%;"></div>
+                          </div>
+                        </div>
+                        
+                        <!-- Badges -->
+                        ${a.badges.length > 0 ? `
+                          <div class="flex flex-wrap gap-2">
+                            ${a.badges.slice(0, 5).map(badgeId => {
+                              const badge = BADGES[badgeId];
+                              return badge ? `
+                                <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-100 text-yellow-800" style="font-size: ${baseSize * 0.75}px;" title="${badge.descricao}">
+                                  <span>${badge.emoji}</span>
+                                  <span>${badge.nome}</span>
+                                </div>
+                              ` : '';
+                            }).join('')}
+                            ${a.badges.length > 5 ? `
+                              <div class="px-2 py-1 rounded-lg bg-gray-100 text-gray-600" style="font-size: ${baseSize * 0.75}px;">
+                                +${a.badges.length - 5} mais
+                              </div>
+                            ` : ''}
+                          </div>
+                        ` : `
+                          <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Nenhuma conquista ainda</p>
+                        `}
+                      </div>
+                      
+                      <!-- Streak -->
+                      ${a.streak_atual > 0 ? `
+                        <div class="text-center">
+                          <div class="streak-fire px-3 py-2 rounded-xl pulse-animation">
+                            <div style="font-size: ${baseSize * 1.2}px;">🔥</div>
+                            <div style="font-size: ${baseSize * 0.9}px; font-weight: 600;">${a.streak_atual}</div>
+                          </div>
+                          <p style="font-size: ${baseSize * 0.7}px; opacity: 0.7; margin-top: 4px;">dias</p>
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : `
+              <div class="text-center py-12">
+                <div style="font-size: ${baseSize * 3}px; opacity: 0.3; margin-bottom: 16px;">🏆</div>
+                <p style="font-size: ${baseSize * 1.1}px; opacity: 0.7;">Nenhuma afiliada cadastrada ainda</p>
+              </div>
+            `}
+          </div>
+          
+          <!-- Sistema de Níveis -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700;">⭐ Sistema de Níveis</h3>
+              <div class="text-right">
+                <p style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">
+                  ${new Date(anoVisualizacao, mesVisualizacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </p>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">Níveis baseados no mês selecionado</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              ${Object.entries(NIVEIS).map(([nivel, info]) => {
+                const afiliadasNoNivel = afiliadasComPontos.filter(a => a.nivel == nivel && a.registrosDoMes > 0);
+                return `
+                  <div class="p-4 rounded-xl border-2 ${afiliadasNoNivel.length > 0 ? 'border-purple-300 bg-purple-50' : 'border-gray-200 bg-gray-50'}">
+                    <div class="flex items-center gap-3 mb-2">
+                      <div class="nivel-badge" style="background: ${info.cor};">
+                        ${nivel}
+                      </div>
+                      <div>
+                        <h4 style="font-size: ${baseSize * 1.05}px; font-weight: 600;">${info.nome}</h4>
+                        <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">${info.pontos}+ pontos</p>
+                      </div>
+                    </div>
+                    
+                    ${afiliadasNoNivel.length > 0 ? `
+                      <div class="mt-3">
+                        <p style="font-size: ${baseSize * 0.8}px; font-weight: 500; margin-bottom: 4px;">Afiliadas neste nível:</p>
+                        <div class="space-y-1">
+                          ${afiliadasNoNivel.map(a => `
+                            <div class="flex items-center justify-between">
+                              <span style="font-size: ${baseSize * 0.75}px; opacity: 0.8;">• ${a.nome}</span>
+                              <span style="font-size: ${baseSize * 0.7}px; opacity: 0.6;">${a.pontos} pts</span>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    ` : `
+                      <div class="mt-3">
+                        <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Nenhuma afiliada neste nível no mês selecionado</p>
+                      </div>
+                    `}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          
+          <!-- Conquistas Disponíveis -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700;">🏅 Conquistas do Mês</h3>
+              <div class="text-right">
+                <p style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">
+                  ${new Date(anoVisualizacao, mesVisualizacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </p>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">Conquistas baseadas no mês selecionado</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${Object.entries(BADGES).map(([badgeId, badge]) => {
+                const conquistadaPorNoMes = afiliadasComPontos.filter(a => a.badges.includes(badgeId) && a.registrosDoMes > 0);
+                
+                return `
+                  <div class="p-4 rounded-xl border ${conquistadaPorNoMes.length > 0 ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200 bg-gray-50'}">
+                    <div class="flex items-center gap-3 mb-2">
+                      <span style="font-size: ${baseSize * 1.5}px;">${badge.emoji}</span>
+                      <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                          <h4 style="font-size: ${baseSize * 1.05}px; font-weight: 600;">${badge.nome}</h4>
+                          <span class="px-2 py-1 rounded-lg bg-purple-100 text-purple-800" style="font-size: ${baseSize * 0.8}px; font-weight: 600;">+${badge.pontos} pts</span>
+                        </div>
+                        <p style="font-size: ${baseSize * 0.85}px; opacity: 0.7;">${badge.descricao}</p>
+                      </div>
+                    </div>
+                    
+                    ${conquistadaPorNoMes.length > 0 ? `
+                      <div class="mt-3">
+                        <p style="font-size: ${baseSize * 0.8}px; font-weight: 500; margin-bottom: 4px;">Conquistada no mês por:</p>
+                        <div class="flex flex-wrap gap-2">
+                          ${conquistadaPorNoMes.map(a => `
+                            <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-200 text-yellow-800" style="font-size: ${baseSize * 0.75}px;">
+                              <span>${a.nome}</span>
+                              <span style="opacity: 0.7;">(${a.pontos} pts)</span>
+                            </div>
+                          `).join('')}
+                        </div>
+                      </div>
+                    ` : `
+                      <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Não conquistada no mês selecionado</p>
+                    `}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMetricas() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      const mesAnoVisualizacao = `${anoVisualizacao}-${String(mesVisualizacao + 1).padStart(2, '0')}`;
+      const afiliadasFiltradas = obterAfiliadasFiltradas();
+      
+      // Calcular estatísticas gerais do mês
+      const estatisticasGerais = {
+        totalAfiliadas: afiliadasFiltradas.length,
+        totalPostagens: 0,
+        totalMetas: 0,
+        metasCumpridas: 0,
+        melhorPerformance: null,
+        piorPerformance: null
+      };
+      
+      const dadosAfiliadas = afiliadasFiltradas.map(afiliada => {
+        const metricaAfiliada = metricas.find(m => m.afiliada_id === afiliada.id && m.mes_ano === mesAnoVisualizacao);
+        const stats = calcularEstatisticasAfiliada(afiliada.id, mesVisualizacao, anoVisualizacao);
+        const streak = calcularStreak(afiliada.id);
+        
+        const meta = metricaAfiliada?.meta_mensal || 0;
+        const postagens = stats.postou;
+        const percentualMeta = meta > 0 ? (postagens / meta) * 100 : 0;
+        
+        // Atualizar estatísticas gerais
+        estatisticasGerais.totalPostagens += postagens;
+        if (meta > 0) {
+          estatisticasGerais.totalMetas++;
+          if (percentualMeta >= 100) {
+            estatisticasGerais.metasCumpridas++;
+          }
+        }
+        
+        return {
+          afiliada,
+          metricaAfiliada,
+          stats,
+          streak,
+          meta,
+          postagens,
+          percentualMeta
+        };
+      });
+      
+      // Encontrar melhor e pior performance
+      const afiliadasComMeta = dadosAfiliadas.filter(d => d.meta > 0);
+      if (afiliadasComMeta.length > 0) {
+        estatisticasGerais.melhorPerformance = afiliadasComMeta.reduce((prev, current) => 
+          current.percentualMeta > prev.percentualMeta ? current : prev
+        );
+        estatisticasGerais.piorPerformance = afiliadasComMeta.reduce((prev, current) => 
+          current.percentualMeta < prev.percentualMeta ? current : prev
+        );
+      }
+      
+      return `
+        <div class="space-y-8">
+          <!-- Controles e Filtros -->
+          <div class="glass-effect rounded-2xl p-6 card-shadow">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div>
+                <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 4px;">📊 Métricas Mensais</h3>
+                <p style="font-size: ${baseSize * 0.9}px; opacity: 0.7;">Acompanhe o desempenho detalhado das suas afiliadas</p>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <!-- Filtro por Nome -->
+                <div class="flex items-center gap-2">
+                  <span style="font-size: ${baseSize * 0.9}px; font-weight: 500;">🔍</span>
+                  <input 
+                    type="text" 
+                    placeholder="Buscar afiliada..." 
+                    value="${filtroNomeAfiliada}"
+                    oninput="filtrarAfiliadas(this.value)"
+                    class="px-4 py-2 rounded-xl border border-gray-200 focus:border-purple-400 transition-all"
+                    style="font-size: ${baseSize * 0.9}px; min-width: 200px;"
+                  >
+                </div>
+                
+                <!-- Navegação de Mês -->
+                <div class="flex items-center gap-2">
+                  <button onclick="navegarMesMetricas('prev')" class="p-2 rounded-lg gradient-bg text-white hover-lift">‹</button>
+                  <span style="font-size: ${baseSize * 1.1}px; font-weight: 600; min-width: 150px; text-align: center;">
+                    ${new Date(anoVisualizacao, mesVisualizacao).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onclick="navegarMesMetricas('next')" class="p-2 rounded-lg gradient-bg text-white hover-lift">›</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Estatísticas Gerais do Mês -->
+          ${afiliadasFiltradas.length > 0 ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 rounded-xl gradient-bg">
+                    <span class="text-white" style="font-size: ${baseSize * 1.5}px;">📝</span>
+                  </div>
+                  <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${estatisticasGerais.totalPostagens}</span>
+                </div>
+                <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Total de Postagens</h3>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">No mês selecionado</p>
+              </div>
+              
+              <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 rounded-xl gradient-bg">
+                    <span class="text-white" style="font-size: ${baseSize * 1.5}px;">🎯</span>
+                  </div>
+                  <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${estatisticasGerais.metasCumpridas}/${estatisticasGerais.totalMetas}</span>
+                </div>
+                <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Metas Cumpridas</h3>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">${estatisticasGerais.totalMetas > 0 ? `${((estatisticasGerais.metasCumpridas / estatisticasGerais.totalMetas) * 100).toFixed(1)}% de sucesso` : 'Nenhuma meta definida'}</p>
+              </div>
+              
+              <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 rounded-xl gradient-bg">
+                    <span class="text-white" style="font-size: ${baseSize * 1.5}px;">⭐</span>
+                  </div>
+                </div>
+                <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Melhor Performance</h3>
+                ${estatisticasGerais.melhorPerformance ? `
+                  <p style="font-size: ${baseSize * 0.85}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${estatisticasGerais.melhorPerformance.afiliada.nome}</p>
+                  <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">${estatisticasGerais.melhorPerformance.percentualMeta.toFixed(1)}% da meta</p>
+                ` : `
+                  <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Sem dados suficientes</p>
+                `}
+              </div>
+              
+              <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 rounded-xl gradient-bg">
+                    <span class="text-white" style="font-size: ${baseSize * 1.5}px;">👥</span>
+                  </div>
+                  <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${afiliadasFiltradas.length}</span>
+                </div>
+                <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Afiliadas ${filtroNomeAfiliada ? 'Filtradas' : 'Ativas'}</h3>
+                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">${filtroNomeAfiliada ? `Filtro: "${filtroNomeAfiliada}"` : 'Total cadastradas'}</p>
+              </div>
+            </div>
+          ` : ''}
+          
+          <!-- Tabela de Métricas Detalhadas -->
+          ${afiliadasFiltradas.length > 0 ? `
+            <div class="glass-effect rounded-2xl p-6 card-shadow">
+              <div class="flex items-center justify-between mb-6">
+                <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700;">📋 Detalhamento por Afiliada</h3>
+                ${filtroNomeAfiliada ? `
+                  <button onclick="filtrarAfiliadas('')" class="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 transition-all" style="font-size: ${baseSize * 0.9}px;">
+                    ✕ Limpar Filtro
+                  </button>
+                ` : ''}
+              </div>
+              
+              <!-- Tabela Desktop -->
+              <div class="hidden lg:block overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b border-gray-200">
+                      <th class="text-left py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Afiliada</th>
+                      <th class="text-center py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Postagens</th>
+                      <th class="text-center py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Meta</th>
+                      <th class="text-center py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Cumprimento</th>
+                      <th class="text-center py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Streak</th>
+                      <th class="text-center py-4 px-2" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${dadosAfiliadas.map(dados => `
+                      <tr class="border-b border-gray-100 hover:bg-gray-50 transition-all">
+                        <td class="py-4 px-2">
+                          <div>
+                            <div style="font-size: ${baseSize * 1.05}px; font-weight: 600; margin-bottom: 2px;">${dados.afiliada.nome}</div>
+                            ${dados.afiliada.link_instagram ? `
+                              <a href="${dados.afiliada.link_instagram}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="font-size: ${baseSize * 0.85}px; opacity: 0.7; color: ${config.primary_color || defaultConfig.primary_color};">@${dados.afiliada.instagram}</a>
+                            ` : `
+                              <div style="font-size: ${baseSize * 0.85}px; opacity: 0.7;">@${dados.afiliada.instagram}</div>
+                            `}
+                          </div>
+                        </td>
+                        <td class="text-center py-4 px-2">
+                          <div class="flex flex-col items-center">
+                            <span style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: #10B981;">${dados.postagens}</span>
+                            <div class="flex gap-1 mt-1" style="font-size: ${baseSize * 0.7}px;">
+                              <span style="color: #10B981;">✅${dados.stats.postou}</span>
+                              <span style="color: #EF4444;">❌${dados.stats.naoPostou}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="text-center py-4 px-2">
+                          <span style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: #3B82F6;">${dados.meta || '-'}</span>
+                        </td>
+                        <td class="text-center py-4 px-2">
+                          ${dados.meta > 0 ? `
+                            <div class="flex flex-col items-center">
+                              <span style="font-size: ${baseSize * 1.2}px; font-weight: 700; color: ${dados.percentualMeta >= 100 ? '#10B981' : dados.percentualMeta >= 80 ? '#F59E0B' : '#EF4444'};">
+                                ${dados.percentualMeta.toFixed(1)}%
+                              </span>
+                              <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                                <div class="progress-bar h-2 rounded-full" style="width: ${Math.min(dados.percentualMeta, 100)}%;"></div>
+                              </div>
+                            </div>
+                          ` : `
+                            <span style="font-size: ${baseSize * 0.9}px; opacity: 0.5;">Sem meta</span>
+                          `}
+                        </td>
+                        <td class="text-center py-4 px-2">
+                          ${dados.streak.atual > 0 ? `
+                            <div class="flex flex-col items-center">
+                              <div class="flex items-center gap-1">
+                                <span style="font-size: ${baseSize * 1.1}px;">🔥</span>
+                                <span style="font-size: ${baseSize * 1.1}px; font-weight: 600; color: #F59E0B;">${dados.streak.atual}</span>
+                              </div>
+                              <span style="font-size: ${baseSize * 0.7}px; opacity: 0.7;">dias</span>
+                            </div>
+                          ` : `
+                            <span style="font-size: ${baseSize * 0.9}px; opacity: 0.5;">-</span>
+                          `}
+                        </td>
+                        <td class="text-center py-4 px-2">
+                          <div class="flex justify-center gap-2">
+                            <button onclick="abrirModalMeta('${dados.afiliada.id}')" class="px-3 py-1 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.8}px;" title="Definir Meta">
+                              🎯
+                            </button>
+                            <button onclick="abrirCalendario(${JSON.stringify(dados.afiliada).replace(/"/g, '&quot;')})" class="px-3 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 text-white hover-lift" style="font-size: ${baseSize * 0.8}px;" title="Ver Calendário">
+                              📅
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Cards Mobile -->
+              <div class="lg:hidden space-y-4">
+                ${dadosAfiliadas.map(dados => `
+                  <div class="gradient-card rounded-xl p-4 hover-lift">
+                    <div class="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 style="font-size: ${baseSize * 1.1}px; font-weight: 700; margin-bottom: 2px;">${dados.afiliada.nome}</h4>
+                        ${dados.afiliada.link_instagram ? `
+                          <a href="${dados.afiliada.link_instagram}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="font-size: ${baseSize * 0.85}px; opacity: 0.7; color: ${config.primary_color || defaultConfig.primary_color};">@${dados.afiliada.instagram}</a>
+                        ` : `
+                          <p style="font-size: ${baseSize * 0.85}px; opacity: 0.7;">@${dados.afiliada.instagram}</p>
+                        `}
+                      </div>
+                      <div class="flex gap-2">
+                        <button onclick="abrirModalMeta('${dados.afiliada.id}')" class="p-2 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.8}px;">🎯</button>
+                        <button onclick="abrirCalendario(${JSON.stringify(dados.afiliada).replace(/"/g, '&quot;')})" class="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white hover-lift" style="font-size: ${baseSize * 0.8}px;">📅</button>
+                      </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                      <div class="text-center p-3 rounded-xl bg-green-50">
+                        <div style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: #10B981; margin-bottom: 4px;">${dados.postagens}</div>
+                        <div style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">Postagens</div>
+                      </div>
+                      
+                      <div class="text-center p-3 rounded-xl bg-blue-50">
+                        <div style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">${dados.meta || '-'}</div>
+                        <div style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">Meta</div>
+                      </div>
+                    </div>
+                    
+                    ${dados.meta > 0 ? `
+                      <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                          <span style="font-size: ${baseSize * 0.9}px; font-weight: 500;">Cumprimento</span>
+                          <span style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${dados.percentualMeta >= 100 ? '#10B981' : dados.percentualMeta >= 80 ? '#F59E0B' : '#EF4444'};">
+                            ${dados.percentualMeta.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                          <div class="progress-bar h-3 rounded-full" style="width: ${Math.min(dados.percentualMeta, 100)}%;"></div>
+                        </div>
+                      </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-between items-center text-center" style="font-size: ${baseSize * 0.85}px;">
+                      <div>
+                        <div style="font-weight: 600; color: #10B981; margin-bottom: 4px;">${dados.stats.postou}</div>
+                        <div style="opacity: 0.7;">✅ Postou</div>
+                      </div>
+                      <div>
+                        <div style="font-weight: 600; color: #EF4444; margin-bottom: 4px;">${dados.stats.naoPostou}</div>
+                        <div style="opacity: 0.7;">❌ Não Postou</div>
+                      </div>
+                      <div>
+                        <div style="font-weight: 600; color: #F59E0B; margin-bottom: 4px;">${dados.streak.atual}</div>
+                        <div style="opacity: 0.7;">🔥 Streak</div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="glass-effect rounded-2xl p-12 card-shadow text-center">
+              <div style="font-size: ${baseSize * 3}px; opacity: 0.3; margin-bottom: 16px;">
+                ${filtroNomeAfiliada ? '🔍' : '📊'}
+              </div>
+              <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 600; margin-bottom: 8px;">
+                ${filtroNomeAfiliada ? 'Nenhuma afiliada encontrada' : 'Nenhuma afiliada cadastrada'}
+              </h3>
+              <p style="font-size: ${baseSize * 1.05}px; opacity: 0.7; margin-bottom: 24px;">
+                ${filtroNomeAfiliada 
+                  ? `Não encontramos afiliadas com "${filtroNomeAfiliada}". Tente outro termo de busca.`
+                  : 'Adicione afiliadas para começar a acompanhar as métricas mensais'
+                }
+              </p>
+              ${filtroNomeAfiliada ? `
+                <button onclick="filtrarAfiliadas('')" class="px-6 py-3 rounded-xl gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.95}px;">
+                  ✕ Limpar Filtro
+                </button>
+              ` : ''}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    // Continuar com as outras funções de renderização...
+    function renderCalendario() {
+      if (!selectedAfiliada) return '';
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+      const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
+      const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      
+      let calendarHTML = `
+        <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+          <div class="max-w-lg w-full mx-4 glass-effect rounded-2xl p-8 card-shadow animate-fade-in">
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">📅 ${selectedAfiliada.nome}</h3>
+                <p style="font-size: ${baseSize * 0.9}px; opacity: 0.7;">Marque as postagens do mês</p>
+              </div>
+              <button onclick="fecharCalendario()" class="p-3 rounded-xl hover:bg-gray-100 transition-all" style="font-size: ${baseSize * 1.2}px;">✕</button>
+            </div>
+            
+            <div class="flex items-center justify-between mb-6">
+              <button onclick="navegarMes('prev')" class="p-3 rounded-xl gradient-bg text-white hover-lift">‹</button>
+              <h4 style="font-size: ${baseSize * 1.2}px; font-weight: 600;">${monthNames[currentMonth]} ${currentYear}</h4>
+              <button onclick="navegarMes('next')" class="p-3 rounded-xl gradient-bg text-white hover-lift">›</button>
+            </div>
+            
+            <div class="grid grid-cols-7 gap-2 mb-4">
+              ${dayNames.map(day => `
+                <div class="text-center p-3" style="font-size: ${baseSize * 0.85}px; font-weight: 600; opacity: 0.7;">${day}</div>
+              `).join('')}
+            </div>
+            
+            <div class="grid grid-cols-7 gap-2 mb-6">
+      `;
+      
+      // Dias vazios no início
+      for (let i = 0; i < firstDay; i++) {
+        calendarHTML += '<div></div>';
+      }
+      
+      // Dias do mês
+      for (let day = 1; day <= daysInMonth; day++) {
+        const status = getStatusForDay(selectedAfiliada.id, day, currentMonth, currentYear);
+        let statusClass = 'bg-gray-100 text-gray-700';
+        
+        if (status === 'postou') {
+          statusClass = 'status-postou';
+        } else if (status === 'postou_vendas') {
+          statusClass = 'status-postou-vendas';
+        } else if (status === 'nao_postou') {
+          statusClass = 'status-nao-postou';
+        } else if (status === 'sem_analise') {
+          statusClass = 'status-sem-analise';
+        }
+        
+        calendarHTML += `
+          <div class="relative">
+            <button onclick="toggleDayMenu(${day})" class="calendar-day w-full aspect-square rounded-xl flex items-center justify-center ${statusClass}" style="font-size: ${baseSize * 0.9}px; font-weight: 600;">
+              ${day}
+            </button>
+            <div id="day-menu-${day}" class="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl border z-20 hidden overflow-hidden" style="min-width: 180px;">
+              <button onclick="marcarDia(${day}, 'postou_vendas')" class="w-full text-left px-4 py-3 hover:bg-green-50 transition-all" style="color: #059669; font-size: ${baseSize * 0.85}px;">🟢 Postou Completo</button>
+              <button onclick="marcarDia(${day}, 'postou')" class="w-full text-left px-4 py-3 hover:bg-yellow-50 transition-all" style="color: #D97706; font-size: ${baseSize * 0.85}px;">🟡 Atenção</button>
+              <button onclick="marcarDia(${day}, 'nao_postou')" class="w-full text-left px-4 py-3 hover:bg-red-50 transition-all" style="color: #EF4444; font-size: ${baseSize * 0.85}px;">🔴 Não Postou</button>
+              <button onclick="marcarDia(${day}, 'sem_analise')" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition-all" style="color: #6B7280; font-size: ${baseSize * 0.85}px;">⚪ Sem Análise</button>
+              ${status ? `<button onclick="marcarDia(${day}, null)" class="w-full text-left px-4 py-3 hover:bg-gray-50 border-t transition-all" style="color: #64748b; font-size: ${baseSize * 0.85}px;">🗑️ Limpar</button>` : ''}
+            </div>
+          </div>
+        `;
+      }
+      
+      calendarHTML += `
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4" style="font-size: ${baseSize * 0.85}px;">
+              <div class="flex items-center gap-2">
+                <span>🟢 Postou Completo</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>🟡 Atenção</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>🔴 Não Postou</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>⚪ Sem Análise</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return calendarHTML;
+    }
+
+    function renderModalEdicao() {
+      if (!editingAfiliada) return '';
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      return `
+        <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+          <div class="max-w-md w-full mx-4 glass-effect rounded-2xl p-8 card-shadow animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">✏️ Editar Afiliada</h3>
+              <button onclick="cancelarEdicao()" class="p-3 rounded-xl hover:bg-gray-100 transition-all" style="font-size: ${baseSize * 1.2}px;">✕</button>
+            </div>
+            
+            <form onsubmit="salvarEdicao(event)" class="space-y-4">
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Nome Completo</label>
+                <input type="text" name="nome" value="${editingAfiliada.nome}" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+              </div>
+              
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Instagram (sem @)</label>
+                <input type="text" name="instagram" value="${editingAfiliada.instagram}" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+              </div>
+              
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Link do Instagram</label>
+                <input type="url" name="link_instagram" value="${editingAfiliada.link_instagram || ''}" placeholder="https://instagram.com/usuario" class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+              </div>
+              
+              <div>
+                <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Observações</label>
+                <textarea name="observacoes" rows="3" class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">${editingAfiliada.observacoes || ''}</textarea>
+              </div>
+              
+              <div class="flex gap-3 pt-4">
+                <button type="button" onclick="cancelarEdicao()" class="flex-1 py-3 px-6 rounded-xl font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all" style="font-size: ${baseSize}px;">
+                  Cancelar
+                </button>
+                <button type="submit" ${isLoading ? 'disabled' : ''} class="flex-1 py-3 px-6 rounded-xl font-semibold gradient-bg text-white hover-lift transition-all" style="font-size: ${baseSize}px; opacity: ${isLoading ? '0.6' : '1'};">
+                  ${isLoading ? '⏳ Salvando...' : '💾 Salvar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModalConfirmacao() {
+      if (!confirmandoExclusao) return '';
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      return `
+        <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+          <div class="max-w-md w-full mx-4 glass-effect rounded-2xl p-8 card-shadow animate-fade-in">
+            <div class="text-center mb-6">
+              <div style="font-size: ${baseSize * 3}px; margin-bottom: 16px;">⚠️</div>
+              <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; margin-bottom: 8px;">Confirmar Exclusão</h3>
+              <p style="font-size: ${baseSize * 1.05}px; opacity: 0.8;">
+                Tem certeza que deseja excluir a afiliada <strong>${confirmandoExclusao.nome}</strong>?
+              </p>
+              <p style="font-size: ${baseSize * 0.9}px; opacity: 0.6; margin-top: 8px;">
+                ⚠️ Todos os registros, métricas e pontuação também serão excluídos permanentemente.
+              </p>
+            </div>
+            
+            <div class="flex gap-3">
+              <button onclick="cancelarExclusao()" class="flex-1 py-3 px-6 rounded-xl font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all" style="font-size: ${baseSize}px;">
+                Cancelar
+              </button>
+              <button onclick="excluirAfiliada()" ${isLoading ? 'disabled' : ''} class="flex-1 py-3 px-6 rounded-xl font-semibold bg-red-500 hover:bg-red-600 text-white transition-all" style="font-size: ${baseSize}px; opacity: ${isLoading ? '0.6' : '1'};">
+                ${isLoading ? '⏳ Excluindo...' : '🗑️ Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApp() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Inter, system-ui, -apple-system, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      const kpis = calcularKPIs();
+      
+      const app = document.getElementById('app');
+      app.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      app.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      app.style.color = config.text_color || defaultConfig.text_color;
+      app.style.fontSize = `${baseSize}px`;
+      
+      app.innerHTML = `
+        <div class="min-h-full">
+          <div id="mensagens" class="fixed top-6 right-6 z-40 max-w-md"></div>
+          
+          <!-- Header -->
+          <div class="gradient-bg text-white p-8">
+            <div class="max-w-7xl mx-auto">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h1 class="mb-2 animate-fade-in" style="font-size: ${baseSize * 2.5}px; font-weight: 700;">${config.titulo_principal || defaultConfig.titulo_principal}</h1>
+                  <p class="animate-fade-in" style="font-size: ${baseSize * 1.1}px; opacity: 0.9;">${config.subtitulo || defaultConfig.subtitulo}</p>
+                </div>
+                <button onclick="editandoTitulo = true; renderApp()" class="ml-4 p-3 rounded-xl bg-white bg-opacity-20 hover:bg-opacity-30 transition-all hover-lift" style="font-size: ${baseSize * 1.1}px;" title="Editar Título">
+                  ✏️
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Navigation Tabs -->
+          <div class="max-w-7xl mx-auto px-6 -mt-4">
+            <div class="glass-effect rounded-2xl p-2 card-shadow mb-8">
+              <div class="flex gap-2">
+                <button onclick="abaSelecionada = 'dashboard'; renderApp()" class="flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${abaSelecionada === 'dashboard' ? 'gradient-bg text-white' : 'hover:bg-gray-100'}" style="font-size: ${baseSize * 0.95}px;">
+                  📊 Dashboard
+                </button>
+                <button onclick="abaSelecionada = 'gamificacao'; renderApp()" class="flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${abaSelecionada === 'gamificacao' ? 'gradient-bg text-white' : 'hover:bg-gray-100'}" style="font-size: ${baseSize * 0.95}px;">
+                  🏆 Gamificação
+                </button>
+                <button onclick="abaSelecionada = 'metricas'; renderApp()" class="flex-1 py-3 px-6 rounded-xl font-semibold transition-all ${abaSelecionada === 'metricas' ? 'gradient-bg text-white' : 'hover:bg-gray-100'}" style="font-size: ${baseSize * 0.95}px;">
+                  📈 Métricas
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="max-w-7xl mx-auto p-6">
+            ${abaSelecionada === 'dashboard' ? `
+              <!-- KPIs -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift animate-fade-in">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-xl gradient-bg">
+                      <span class="text-white" style="font-size: ${baseSize * 1.5}px;">👥</span>
+                    </div>
+                    <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${kpis.totalAfiliadas}</span>
+                  </div>
+                  <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Total de Afiliadas Ativas</h3>
+                </div>
+                
+                <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift animate-fade-in">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-xl gradient-bg">
+                      <span class="text-white" style="font-size: ${baseSize * 1.5}px;">📈</span>
+                    </div>
+                    <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${kpis.taxaMedia.toFixed(1)}%</span>
+                  </div>
+                  <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Taxa Média de Cumprimento</h3>
+                </div>
+                
+                <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift animate-fade-in">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-xl gradient-bg">
+                      <span class="text-white" style="font-size: ${baseSize * 1.5}px;">😴</span>
+                    </div>
+                    <span style="font-size: ${baseSize * 2.5}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${kpis.afiliadosInativos}</span>
+                  </div>
+                  <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Total de Afiliados Inativos</h3>
+                  <p style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Nunca fizeram postagens</p>
+                </div>
+                
+                <div class="glass-effect rounded-2xl p-6 card-shadow hover-lift animate-fade-in">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-xl gradient-bg">
+                      <span class="text-white" style="font-size: ${baseSize * 1.5}px;">⭐</span>
+                    </div>
+                  </div>
+                  <h3 style="font-size: ${baseSize * 0.9}px; font-weight: 600; opacity: 0.7;">Afiliada Destaque</h3>
+                  ${kpis.afiliadaDestaque ? `
+                    <p style="font-size: ${baseSize * 0.95}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${kpis.afiliadaDestaque.nome}</p>
+                    <p style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">${kpis.afiliadaDestaque.taxaCumprimento.toFixed(1)}% de cumprimento</p>
+                  ` : `
+                    <p style="font-size: ${baseSize * 0.9}px; opacity: 0.5;">Nenhum dado disponível</p>
+                  `}
+                </div>
+              </div>
+              
+              <!-- Formulário de Adição -->
+              <div class="glass-effect rounded-2xl p-6 card-shadow mb-8">
+                <h3 class="mb-6" style="font-size: ${baseSize * 1.25}px; font-weight: 600;">➕ Adicionar Nova Afiliada</h3>
+                
+                <form onsubmit="adicionarAfiliada(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Nome Completo</label>
+                    <input type="text" name="nome" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+                  </div>
+                  
+                  <div>
+                    <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Instagram (sem @)</label>
+                    <input type="text" name="instagram" required class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+                  </div>
+                  
+                  <div>
+                    <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Link do Instagram</label>
+                    <input type="url" name="link_instagram" placeholder="https://instagram.com/usuario" class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+                  </div>
+                  
+                  <div>
+                    <label style="font-size: ${baseSize * 0.9}px; font-weight: 500; display: block; margin-bottom: 8px;">Observações</label>
+                    <input type="text" name="observacoes" class="w-full p-3 rounded-xl border border-gray-200 focus:border-purple-400 transition-all" style="font-size: ${baseSize * 0.95}px;">
+                  </div>
+                  
+                  <div class="md:col-span-2 lg:col-span-4">
+                    <button type="submit" ${isLoading ? 'disabled' : ''} class="w-full py-3 px-6 rounded-xl font-semibold gradient-bg text-white hover-lift transition-all" style="font-size: ${baseSize}px; opacity: ${isLoading ? '0.6' : '1'};">
+                      ${isLoading ? '⏳ Adicionando...' : '✅ Adicionar Afiliada'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <!-- Lista de Afiliadas -->
+              ${afiliadas.length > 0 ? `
+                <div class="glass-effect rounded-2xl p-6 card-shadow">
+                  <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+                    <h3 style="font-size: ${baseSize * 1.25}px; font-weight: 600;">👥 Gerenciar Afiliadas</h3>
+                    
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                      <!-- Filtro de Mês -->
+                      <div class="flex items-center gap-2">
+                        <span style="font-size: ${baseSize * 0.9}px; font-weight: 500; opacity: 0.7;">📅 Mês:</span>
+                        <div class="flex items-center gap-2">
+                          <button onclick="navegarMes('prev')" class="p-2 rounded-lg gradient-bg text-white hover-lift">‹</button>
+                          <span style="font-size: ${baseSize * 0.95}px; font-weight: 600; min-width: 120px; text-align: center;">
+                            ${new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                          </span>
+                          <button onclick="navegarMes('next')" class="p-2 rounded-lg gradient-bg text-white hover-lift">›</button>
+                        </div>
+                      </div>
+                      
+                      <!-- Controles de Visualização -->
+                      <div class="flex items-center gap-2">
+                        <span style="font-size: ${baseSize * 0.9}px; font-weight: 500; opacity: 0.7;">Visualização:</span>
+                        <div class="flex rounded-xl bg-gray-100 p-1">
+                          <button onclick="modoVisualizacao = 'grade'; renderApp()" class="px-3 py-2 rounded-lg transition-all ${modoVisualizacao === 'grade' ? 'gradient-bg text-white' : 'hover:bg-gray-200'}" style="font-size: ${baseSize * 0.85}px;" title="Grade">
+                            ⊞
+                          </button>
+                          <button onclick="modoVisualizacao = 'linha'; renderApp()" class="px-3 py-2 rounded-lg transition-all ${modoVisualizacao === 'linha' ? 'gradient-bg text-white' : 'hover:bg-gray-200'}" style="font-size: ${baseSize * 0.85}px;" title="Lista">
+                            ☰
+                          </button>
+                          <button onclick="modoVisualizacao = 'blocos'; renderApp()" class="px-3 py-2 rounded-lg transition-all ${modoVisualizacao === 'blocos' ? 'gradient-bg text-white' : 'hover:bg-gray-200'}" style="font-size: ${baseSize * 0.85}px;" title="Blocos">
+                            ▦
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Visualização Grade -->
+                  ${modoVisualizacao === 'grade' ? `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      ${afiliadas.map(a => {
+                        const stats = calcularEstatisticasAfiliada(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos apenas do mês selecionado
+                        const registrosDoMes = registros.filter(r => {
+                          if (r.afiliada_id !== a.id) return false;
+                          const dataRegistro = new Date(r.data);
+                          return dataRegistro.getMonth() === currentMonth && dataRegistro.getFullYear() === currentYear;
+                        });
+                        
+                        const registrosPostou = registrosDoMes.filter(r => r.status === 'postou');
+                        const registrosPostouVendas = registrosDoMes.filter(r => r.status === 'postou_vendas');
+                        
+                        // Calcular badges do mês
+                        const badgesDoMes = verificarBadgesMes(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos do mês
+                        let pontosDoMes = (registrosPostou.length * PONTOS.postou) + (registrosPostouVendas.length * PONTOS.postou_vendas);
+                        
+                        // Adicionar pontos das badges do mês
+                        badgesDoMes.forEach(badgeId => {
+                          const badge = BADGES[badgeId];
+                          if (badge && badge.pontos) {
+                            pontosDoMes += badge.pontos;
+                          }
+                        });
+                        
+                        const nivelDoMes = calcularNivel(pontosDoMes);
+                        const nivelInfo = NIVEIS[nivelDoMes];
+                        
+                        return `
+                          <div class="gradient-card rounded-xl p-4 hover-lift">
+                            <div class="flex items-start justify-between mb-3">
+                              <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                  <h4 style="font-size: ${baseSize * 1.05}px; font-weight: 600;">${a.nome}</h4>
+                                  <div class="nivel-badge" style="background: ${nivelInfo.cor}; width: 24px; height: 24px; font-size: ${baseSize * 0.7}px;">
+                                    ${nivelDoMes}
+                                  </div>
+                                </div>
+                                ${a.link_instagram ? `
+                                  <a href="${a.link_instagram}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="font-size: ${baseSize * 0.85}px; opacity: 0.7; color: ${config.primary_color || defaultConfig.primary_color};">@${a.instagram}</a>
+                                ` : `
+                                  <p style="font-size: ${baseSize * 0.85}px; opacity: 0.7;">@${a.instagram}</p>
+                                `}
+                                <p style="font-size: ${baseSize * 0.8}px; opacity: 0.6;">${pontosDoMes} pontos • ${nivelInfo.nome}</p>
+                              </div>
+                              <div class="flex gap-1">
+                                <button onclick="editarAfiliada('${a.id}')" class="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.8}px;" title="Editar">
+                                  ✏️
+                                </button>
+                                <button onclick="abrirCalendario(${JSON.stringify(a).replace(/"/g, '&quot;')})" class="p-2 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.8}px;" title="Calendário">
+                                  📅
+                                </button>
+                                <button onclick="confirmarExclusao('${a.id}', '${a.nome.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.8}px;" title="Excluir">
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                            
+                            ${stats.taxaCumprimento > 0 ? `
+                              <div class="mb-3">
+                                <div class="flex justify-between items-center mb-2">
+                                  <span style="font-size: ${baseSize * 0.85}px;">Performance</span>
+                                  <span style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${stats.taxaCumprimento.toFixed(1)}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                  <div class="progress-bar h-2 rounded-full" style="width: ${stats.taxaCumprimento}%;"></div>
+                                </div>
+                              </div>
+                              
+                              <div class="flex justify-between text-center" style="font-size: ${baseSize * 0.8}px;">
+                                <div>
+                                  <div style="font-weight: 600; color: #10B981;">${stats.postou}</div>
+                                  <div style="opacity: 0.7;">Postou</div>
+                                </div>
+                                <div>
+                                  <div style="font-weight: 600; color: #EF4444;">${stats.naoPostou}</div>
+                                  <div style="opacity: 0.7;">Não Postou</div>
+                                </div>
+                                <div>
+                                  <div style="font-weight: 600; color: #6B7280;">${stats.semAnalise}</div>
+                                  <div style="opacity: 0.7;">Sem Análise</div>
+                                </div>
+                              </div>
+                            ` : `
+                              <div class="text-center py-4">
+                                <p style="font-size: ${baseSize * 0.9}px; opacity: 0.5;">Nenhum registro este mês</p>
+                                <button onclick="abrirCalendario(${JSON.stringify(a).replace(/"/g, '&quot;')})" class="mt-2 px-4 py-2 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.85}px;">
+                                  Começar a marcar
+                                </button>
+                              </div>
+                            `}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  ` : ''}
+                  
+                  <!-- Visualização Lista -->
+                  ${modoVisualizacao === 'linha' ? `
+                    <div class="space-y-2">
+                      ${afiliadas.map(a => {
+                        const stats = calcularEstatisticasAfiliada(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos apenas do mês selecionado
+                        const registrosDoMes = registros.filter(r => {
+                          if (r.afiliada_id !== a.id) return false;
+                          const dataRegistro = new Date(r.data);
+                          return dataRegistro.getMonth() === currentMonth && dataRegistro.getFullYear() === currentYear;
+                        });
+                        
+                        const registrosPostou = registrosDoMes.filter(r => r.status === 'postou');
+                        const registrosPostouVendas = registrosDoMes.filter(r => r.status === 'postou_vendas');
+                        
+                        // Calcular badges do mês
+                        const badgesDoMes = verificarBadgesMes(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos do mês
+                        let pontosDoMes = (registrosPostou.length * PONTOS.postou) + (registrosPostouVendas.length * PONTOS.postou_vendas);
+                        
+                        // Adicionar pontos das badges do mês
+                        badgesDoMes.forEach(badgeId => {
+                          const badge = BADGES[badgeId];
+                          if (badge && badge.pontos) {
+                            pontosDoMes += badge.pontos;
+                          }
+                        });
+                        
+                        const nivelDoMes = calcularNivel(pontosDoMes);
+                        const nivelInfo = NIVEIS[nivelDoMes];
+                        
+                        return `
+                          <div class="gradient-card rounded-xl p-3 hover-lift">
+                            <div class="flex items-center gap-4">
+                              <!-- Nível -->
+                              <div class="nivel-badge" style="background: ${nivelInfo.cor}; width: 28px; height: 28px; font-size: ${baseSize * 0.75}px;">
+                                ${nivelDoMes}
+                              </div>
+                              
+                              <!-- Nome e Instagram -->
+                              <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                  <h4 style="font-size: ${baseSize * 0.95}px; font-weight: 600;">${a.nome}</h4>
+                                  ${a.link_instagram ? `
+                                    <a href="${a.link_instagram}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="font-size: ${baseSize * 0.8}px; opacity: 0.7; color: ${config.primary_color || defaultConfig.primary_color};">@${a.instagram}</a>
+                                  ` : `
+                                    <span style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">@${a.instagram}</span>
+                                  `}
+                                </div>
+                              </div>
+                              
+                              <!-- Pontos -->
+                              <div class="text-center min-w-0">
+                                <div style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${pontosDoMes}</div>
+                                <div style="font-size: ${baseSize * 0.7}px; opacity: 0.7;">pontos</div>
+                              </div>
+                              
+                              <!-- Estatísticas -->
+                              ${stats.taxaCumprimento > 0 ? `
+                                <div class="flex items-center gap-4">
+                                  <div class="text-center min-w-0">
+                                    <div style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: #10B981;">${stats.postou}</div>
+                                    <div style="font-size: ${baseSize * 0.7}px; opacity: 0.7;">✅</div>
+                                  </div>
+                                  <div class="text-center min-w-0">
+                                    <div style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: #EF4444;">${stats.naoPostou}</div>
+                                    <div style="font-size: ${baseSize * 0.7}px; opacity: 0.7;">❌</div>
+                                  </div>
+                                  <div class="text-center min-w-0">
+                                    <div style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${stats.taxaCumprimento.toFixed(0)}%</div>
+                                    <div style="font-size: ${baseSize * 0.7}px; opacity: 0.7;">perf</div>
+                                  </div>
+                                </div>
+                              ` : `
+                                <div class="text-center min-w-0">
+                                  <span style="font-size: ${baseSize * 0.8}px; opacity: 0.5;">Sem dados</span>
+                                </div>
+                              `}
+                              
+                              <!-- Ações -->
+                              <div class="flex gap-1">
+                                <button onclick="editarAfiliada('${a.id}')" class="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.75}px;" title="Editar">
+                                  ✏️
+                                </button>
+                                <button onclick="abrirCalendario(${JSON.stringify(a).replace(/"/g, '&quot;')})" class="p-2 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.75}px;" title="Calendário">
+                                  📅
+                                </button>
+                                <button onclick="confirmarExclusao('${a.id}', '${a.nome.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.75}px;" title="Excluir">
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  ` : ''}
+                  
+                  <!-- Visualização Blocos -->
+                  ${modoVisualizacao === 'blocos' ? `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      ${afiliadas.map(a => {
+                        const stats = calcularEstatisticasAfiliada(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos apenas do mês selecionado
+                        const registrosDoMes = registros.filter(r => {
+                          if (r.afiliada_id !== a.id) return false;
+                          const dataRegistro = new Date(r.data);
+                          return dataRegistro.getMonth() === currentMonth && dataRegistro.getFullYear() === currentYear;
+                        });
+                        
+                        const registrosPostou = registrosDoMes.filter(r => r.status === 'postou');
+                        const registrosPostouVendas = registrosDoMes.filter(r => r.status === 'postou_vendas');
+                        
+                        // Calcular badges do mês
+                        const badgesDoMes = verificarBadgesMes(a.id, currentMonth, currentYear);
+                        
+                        // Calcular pontos do mês
+                        let pontosDoMes = (registrosPostou.length * PONTOS.postou) + (registrosPostouVendas.length * PONTOS.postou_vendas);
+                        
+                        // Adicionar pontos das badges do mês
+                        badgesDoMes.forEach(badgeId => {
+                          const badge = BADGES[badgeId];
+                          if (badge && badge.pontos) {
+                            pontosDoMes += badge.pontos;
+                          }
+                        });
+                        
+                        const nivelDoMes = calcularNivel(pontosDoMes);
+                        const nivelInfo = NIVEIS[nivelDoMes];
+                        const streak = calcularStreak(a.id);
+                        
+                        return `
+                          <div class="gradient-card rounded-xl p-6 hover-lift">
+                            <!-- Header do Bloco -->
+                            <div class="flex items-start justify-between mb-4">
+                              <div class="flex items-center gap-3">
+                                <div class="nivel-badge" style="background: ${nivelInfo.cor}; width: 40px; height: 40px; font-size: ${baseSize * 0.9}px;">
+                                  ${nivelDoMes}
+                                </div>
+                                <div>
+                                  <h4 style="font-size: ${baseSize * 1.2}px; font-weight: 700; margin-bottom: 2px;">${a.nome}</h4>
+                                  ${a.link_instagram ? `
+                                    <a href="${a.link_instagram}" target="_blank" rel="noopener noreferrer" class="hover:underline" style="font-size: ${baseSize * 0.95}px; opacity: 0.7; color: ${config.primary_color || defaultConfig.primary_color};">@${a.instagram}</a>
+                                  ` : `
+                                    <p style="font-size: ${baseSize * 0.95}px; opacity: 0.7;">@${a.instagram}</p>
+                                  `}
+                                </div>
+                              </div>
+                              
+                              ${streak.atual > 0 ? `
+                                <div class="text-center streak-fire px-3 py-2 rounded-xl">
+                                  <div style="font-size: ${baseSize * 1.3}px;">🔥</div>
+                                  <div style="font-size: ${baseSize * 0.9}px; font-weight: 600;">${streak.atual}</div>
+                                  <div style="font-size: ${baseSize * 0.7}px;">dias</div>
+                                </div>
+                              ` : ''}
+                            </div>
+                            
+                            <!-- Informações do Nível -->
+                            <div class="mb-4 p-3 rounded-xl bg-white bg-opacity-50">
+                              <div class="flex items-center justify-between">
+                                <span style="font-size: ${baseSize * 0.9}px; font-weight: 500;">Nível ${nivelDoMes} - ${nivelInfo.nome}</span>
+                                <span style="font-size: ${baseSize * 0.9}px; font-weight: 600; color: ${config.primary_color || defaultConfig.primary_color};">${pontosDoMes} pontos</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Estatísticas Detalhadas -->
+                            ${stats.taxaCumprimento > 0 ? `
+                              <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                  <span style="font-size: ${baseSize * 0.9}px; font-weight: 500;">Performance do Mês</span>
+                                  <span style="font-size: ${baseSize * 1.1}px; font-weight: 700; color: ${config.primary_color || defaultConfig.primary_color};">${stats.taxaCumprimento.toFixed(1)}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                                  <div class="progress-bar h-3 rounded-full" style="width: ${stats.taxaCumprimento}%;"></div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4 text-center">
+                                  <div class="p-3 rounded-xl bg-green-50">
+                                    <div style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: #10B981; margin-bottom: 4px;">${stats.postou}</div>
+                                    <div style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">✅ Postou</div>
+                                  </div>
+                                  <div class="p-3 rounded-xl bg-red-50">
+                                    <div style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: #EF4444; margin-bottom: 4px;">${stats.naoPostou}</div>
+                                    <div style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">❌ Não Postou</div>
+                                  </div>
+                                  <div class="p-3 rounded-xl bg-gray-50">
+                                    <div style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: #6B7280; margin-bottom: 4px;">${stats.semAnalise}</div>
+                                    <div style="font-size: ${baseSize * 0.8}px; opacity: 0.7;">⚪ Sem Análise</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ` : `
+                              <div class="mb-4 text-center py-6 bg-gray-50 rounded-xl">
+                                <div style="font-size: ${baseSize * 2}px; opacity: 0.3; margin-bottom: 8px;">📅</div>
+                                <p style="font-size: ${baseSize * 0.95}px; opacity: 0.6; margin-bottom: 12px;">Nenhum registro este mês</p>
+                              </div>
+                            `}
+                            
+                            <!-- Observações -->
+                            ${a.observacoes ? `
+                              <div class="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200">
+                                <div class="flex items-start gap-2">
+                                  <span style="font-size: ${baseSize * 0.9}px;">💭</span>
+                                  <p style="font-size: ${baseSize * 0.85}px; opacity: 0.8;">${a.observacoes}</p>
+                                </div>
+                              </div>
+                            ` : ''}
+                            
+                            <!-- Ações -->
+                            <div class="flex gap-2">
+                              <button onclick="editarAfiliada('${a.id}')" class="flex-1 py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.85}px;">
+                                ✏️ Editar
+                              </button>
+                              <button onclick="abrirCalendario(${JSON.stringify(a).replace(/"/g, '&quot;')})" class="flex-1 py-2 px-4 rounded-lg gradient-bg text-white hover-lift" style="font-size: ${baseSize * 0.85}px;">
+                                📅 Calendário
+                              </button>
+                              <button onclick="confirmarExclusao('${a.id}', '${a.nome.replace(/'/g, "\\'")}')" class="py-2 px-3 rounded-lg bg-red-500 hover:bg-red-600 text-white hover-lift transition-all" style="font-size: ${baseSize * 0.85}px;">
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              ` : `
+                <div class="glass-effect rounded-2xl p-12 card-shadow text-center">
+                  <div style="font-size: ${baseSize * 4}px; opacity: 0.3; margin-bottom: 16px;">👥</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 600; margin-bottom: 8px;">Bem-vinda ao seu Dashboard!</h3>
+                  <p style="font-size: ${baseSize * 1.1}px; opacity: 0.7; margin-bottom: 24px;">Comece adicionando sua primeira afiliada para acompanhar o desempenho</p>
+                  <div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-bg text-white" style="font-size: ${baseSize * 0.95}px;">
+                    <span>✨</span>
+                    <span>Use o formulário acima para começar</span>
+                  </div>
+                </div>
+              `}
+            ` : abaSelecionada === 'gamificacao' ? renderGamificacao() : renderMetricas()}
+            
+            <!-- Footer -->
+            <div class="text-center mt-12 pb-8">
+              <p style="font-size: ${baseSize * 0.85}px; opacity: 0.6;">
+                Dashboard desenvolvido por Aylle Duarte • (@aylleduarte)
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        ${selectedAfiliada ? renderCalendario() : ''}
+        ${editingAfiliada ? renderModalEdicao() : ''}
+        ${editingMeta ? renderModalMeta() : ''}
+        ${editandoTitulo ? renderModalEdicaoTitulo() : ''}
+        ${confirmandoExclusao ? renderModalConfirmacao() : ''}
+      `;
+    }
+
+    async function onConfigChange(config) {
+      renderApp();
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange,
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.card_color || defaultConfig.card_color,
+            set: (value) => {
+              config.card_color = value;
+              window.elementSdk.setConfig({ card_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ["titulo_principal", config.titulo_principal || defaultConfig.titulo_principal],
+        ["subtitulo", config.subtitulo || defaultConfig.subtitulo],
+        ["empresa", config.empresa || defaultConfig.empresa]
+      ])
+    });
+
+    (function(){
+      const t=new Date();
+      const y=t.getFullYear();
+      const m=String(t.getMonth()+1).padStart(2,'0');
+      const d=(n)=>String(n).padStart(2,'0');
+      const a1={id:'af1',nome:'Afiliada Alfa',instagram:'afiliada_alfa',link_instagram:'https://instagram.com/afiliada_alfa'};
+      const a2={id:'af2',nome:'Afiliada Beta',instagram:'afiliada_beta',link_instagram:'https://instagram.com/afiliada_beta'};
+      const regs=[
+        {id:'r1',afiliada_id:'af1',data:`${y}-${m}-${d(Math.max(1,t.getDate()-1))}`,status:'postou_vendas'},
+        {id:'r2',afiliada_id:'af1',data:`${y}-${m}-${d(Math.max(1,t.getDate()-2))}`,status:'postou'},
+        {id:'r3',afiliada_id:'af2',data:`${y}-${m}-${d(Math.max(1,t.getDate()-1))}`,status:'postou'}
+      ];
+      const mets=[
+        {id:'m1',afiliada_id:'af1',mes_ano:`${y}-${m}`,meta_mensal:20,postagens_mes:2,created_at:new Date().toISOString()},
+        {id:'m2',afiliada_id:'af2',mes_ano:`${y}-${m}`,meta_mensal:15,postagens_mes:1,created_at:new Date().toISOString()}
+      ];
+      try{ dataHandler.onDataChanged([a1,a2,...regs,...mets]); }catch(e){}
+    })();
+
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a2119ad56f4d06c',t:'MTc2MzczNzY4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
