@@ -1,0 +1,1 @@
+import{o as e,q as d}from"./index-BSbx0JO7.js";const t=({children:s,className:a,hover:r=!1,id:o})=>e.jsx("div",{id:o,className:d(r?"glass-card-hover":"glass-card","rounded-2xl p-6",a),children:s});export{t as G};

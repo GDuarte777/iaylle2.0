@@ -1,0 +1,13 @@
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tsconfig.app.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'vite.config.ts', LF will be replaced by CRLF the next time Git touches it
+U	README.md
+M	README.md
+U	ascend-velocity-main/.vercel/project.json
+U	ascend-velocity-main/package-lock.json
+M	package.json
+D	src/pages/dashboard/LinkBio.tsx
+M	tsconfig.app.json
+M	tsconfig.json
+M	vite.config.ts

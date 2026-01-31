@@ -1,0 +1,1 @@
+import{o as s}from"./index-BSbx0JO7.js";const a="/assets/logo-dark-cropped-XpFBq9hT.png",g="/assets/logo-light-CE9WI6a4.png",e=({className:o="",alt:r="Guildas"})=>s.jsxs(s.Fragment,{children:[s.jsx("img",{src:g,alt:r,className:`dark:hidden block ${o}`}),s.jsx("img",{src:a,alt:r,className:`hidden dark:block ${o}`})]});export{e as L};

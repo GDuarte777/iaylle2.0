@@ -1,0 +1,17 @@
+[33m159bd25[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2026-01-30 19:59:49 -0300}: reset: moving to origin/main
+[33mcfac6b8[m HEAD@{2026-01-30 19:59:29 -0300}: checkout: moving from main to main
+[33mcfac6b8[m HEAD@{2026-01-30 19:02:40 -0300}: rebase (finish): returning to refs/heads/main
+[33mcfac6b8[m HEAD@{2026-01-30 19:02:40 -0300}: rebase (continue): fix: sync linkbio save flow
+[33mfc65821[m HEAD@{2026-01-30 18:48:58 -0300}: pull --rebase origin main (start): checkout fc65821688a656e264d8e842a101ef2ac2be4b34
+[33md5440a3[m HEAD@{2026-01-30 18:47:59 -0300}: commit: fix: sync linkbio save flow
+[33m64b450a[m HEAD@{2026-01-30 17:27:37 -0300}: commit: chore: add temp files
+[33md65e790[m HEAD@{2026-01-30 17:22:20 -0300}: commit: chore: sync project
+[33m990b268[m HEAD@{2025-12-29 01:40:18 -0300}: commit: chore: add build:dev script for Lovable
+[33m3758248[m HEAD@{2025-12-28 17:41:21 -0300}: pull --tags origin main: Fast-forward
+[33ma167e00[m HEAD@{2025-12-28 17:38:11 -0300}: pull --tags origin main: Fast-forward
+[33mb248581[m HEAD@{2025-12-28 01:08:28 -0300}: pull --rebase origin main (finish): returning to refs/heads/main
+[33mb248581[m HEAD@{2025-12-28 01:08:28 -0300}: pull --rebase origin main (pick): chore: update platform and Supabase integration
+[33m7216e96[m HEAD@{2025-12-28 01:08:28 -0300}: pull --rebase origin main (start): checkout 7216e96ccfbdcb2b9485a6a611f8c907fbdad073
+[33m21de296[m HEAD@{2025-12-28 01:07:01 -0300}: commit: chore: update platform and Supabase integration
+[33m2760cf6[m HEAD@{2025-12-15 17:35:53 -0300}: commit: feat: atualizar integração Supabase e dashboard
+[33mcb9ad2b[m HEAD@{2025-11-18 21:01:31 -0300}: clone: from https://github.com/GDuarte777/ascend-velocity.git

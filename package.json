@@ -2,11 +2,10 @@
   "name": "ascend-velocity-root",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix ascend-velocity-main run dev",
-    "build": "npm --prefix ascend-velocity-main run build",
-    "preview": "npm --prefix ascend-velocity-main run preview",
-    "lint": "npm --prefix ascend-velocity-main run lint",
-    "typecheck": "npm --prefix ascend-velocity-main run typecheck",
-    "test": "npm --prefix ascend-velocity-main run test"
+    "dev": "npm --prefix ascend-velocity run dev",
+    "build": "npm --prefix ascend-velocity run build",
+    "preview": "npm --prefix ascend-velocity run preview",
+    "lint": "npm --prefix ascend-velocity run lint",
+    "test": "npm --prefix ascend-velocity run test"
   }
 }
