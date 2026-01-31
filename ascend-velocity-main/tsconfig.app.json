@@ -23,8 +23,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./ascend-velocity/src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["ascend-velocity/src"]
 }
