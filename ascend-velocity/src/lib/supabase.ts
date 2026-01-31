@@ -42,6 +42,24 @@ export const supabase = createClient(
   },
 )
 
+type GetSessionResult = Awaited<ReturnType<typeof supabase.auth.getSession>>
+
+let inFlightSessionPromise: Promise<GetSessionResult> | null = null
+
+export async function getSessionSafe(timeoutMs = 4000): Promise<GetSessionResult> {
+  if (!isSupabaseConfigured) {
+    return { data: { session: null }, error: null } as GetSessionResult
+  }
+
+  if (!inFlightSessionPromise) {
+    inFlightSessionPromise = supabase.auth.getSession().finally(() => {
+      inFlightSessionPromise = null
+    })
+  }
+
+  return await withTimeout(inFlightSessionPromise, timeoutMs, 'Tempo excedido ao validar sessão.')
+}
+
 type MonthlyUsageRpcRow = {
   blocked?: boolean | null;
   block_reason?: string | null;
@@ -66,7 +84,7 @@ export async function incrementMonthlyUsageSafe(input?: {
     try {
       const {
         data: { session },
-      } = await withTimeout(supabase.auth.getSession(), 2500, 'Tempo excedido ao validar sessão.')
+      } = await getSessionSafe(2500)
       accessToken = typeof session?.access_token === 'string' ? session.access_token : null
     } catch {
       accessToken = null
@@ -103,7 +121,7 @@ export async function getAuthedUser() {
   try {
     const {
       data: { session }
-    } = await supabase.auth.getSession()
+    } = await getSessionSafe(2500)
     if (session?.user?.id) return session.user
   } catch {
     void 0

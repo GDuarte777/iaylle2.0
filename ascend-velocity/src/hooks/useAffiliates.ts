@@ -456,9 +456,6 @@ export async function deleteMonthData(year: number, month: number) {
 }
 
 export async function appendCalendarStatus(affiliateId: string, date: string, status: string | null) {
-  const allowed = await enforceFreeWriteAccess();
-  if (!allowed) return false;
-
   const user = await getAuthedUser();
 
   if (!user) {
@@ -491,15 +488,33 @@ export async function appendCalendarStatus(affiliateId: string, date: string, st
     }
     // Continua para reavaliar conquistas e remover pontos se necessário
   } else {
+    let points = 0;
+    try {
+      const cfg = (await import('@/store/statusConfig')).useStatusConfig.getState();
+      const match = (cfg as any)?.classes?.find((c: any) => c?.key === status);
+      const rawPoints = (match as any)?.points;
+      points = typeof rawPoints === 'number' && Number.isFinite(rawPoints) ? rawPoints : 0;
+    } catch {
+      points = 0;
+    }
+
     const { error } = await supabase
       .from('affiliate_metrics')
-      .upsert({ affiliate_id: affiliateId, date, status }, { onConflict: 'affiliate_id,date' });
+      .upsert({ affiliate_id: affiliateId, date, status, points }, { onConflict: 'affiliate_id,date' });
 
     if (error) {
       console.error('Error saving status:', error);
       toast.error('Erro ao salvar status');
       return false;
     }
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('calendar-status-updated'));
+    }
+  } catch {
+    void 0;
   }
 
   // Executa avaliação de conquistas em background para não bloquear a UI

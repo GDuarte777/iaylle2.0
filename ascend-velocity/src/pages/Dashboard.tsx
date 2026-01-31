@@ -17,7 +17,7 @@ import { useBannerStore } from "@/store/bannerStore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { NeonButton } from "@/components/NeonButton";
 import { AffiliateCalendarModal } from "@/components/AffiliateCalendarModal";
-import { getAuthedUser, supabase } from "@/lib/supabase";
+import { getAuthedUser, getSessionSafe, supabase } from "@/lib/supabase";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useTutorial } from "@/hooks/useTutorial";
 import { calculateAchievementsForAffiliate } from "@/lib/gamificationUtils";
@@ -466,11 +466,7 @@ function DashboardInner() {
         } catch (error) {
           void error;
         }
-        try {
-          (supabase as any)?.auth?.refreshSession?.();
-        } catch (error) {
-          void error;
-        }
+        void getSessionSafe(2500).catch(() => void 0);
         reconnectRealtimeRef.current?.();
         refreshData();
       }

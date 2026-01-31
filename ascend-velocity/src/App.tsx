@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { Suspense, lazy, useEffect, useRef } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useStatusConfig } from "@/store/statusConfig";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { getSessionSafe, isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 const LandingNew = lazy(() => import("./pages/LandingNew"));
 const Login = lazy(() => import("./pages/Login"));
@@ -206,13 +206,7 @@ const App = () => {
       if (!isSupabaseConfigured) return;
 
       try {
-        await supabase.auth.getSession();
-      } catch {
-        void 0;
-      }
-
-      try {
-        await (supabase as any)?.auth?.refreshSession?.();
+        await getSessionSafe(2500);
       } catch {
         void 0;
       }

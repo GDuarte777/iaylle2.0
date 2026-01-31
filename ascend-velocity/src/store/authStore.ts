@@ -1,5 +1,8 @@
 import { create } from 'zustand';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, getSessionSafe } from '@/lib/supabase';
+
+let initializeInFlight: Promise<void> | null = null;
+let authSubscription: { unsubscribe: () => void } | null = null;
 
 export type UserRole = 'admin' | 'member';
 export type UserStatus = 'active' | 'waitlist' | 'blocked';
@@ -40,19 +43,21 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
   waitlistMode: false,
   users: [],
 
-  initialize: async () => {
-    try {
-      set({ isLoading: true });
-      if (!isSupabaseConfigured) { set({ user: null, isAuthenticated: false, isLoading: false }); return; }
+  initialize: () => {
+    if (initializeInFlight) return initializeInFlight;
 
-      // Timeout safety: if Supabase takes too long, we stop loading
-      const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) => {
-        setTimeout(() => resolve({ data: { session: null } }), 5000);
-      });
+    initializeInFlight = (async () => {
+      try {
+        set({ isLoading: true });
+        if (!isSupabaseConfigured) { set({ user: null, isAuthenticated: false, isLoading: false }); return; }
 
-      const sessionPromise = supabase.auth.getSession();
-      
-      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        let session: any = null;
+        try {
+          const { data } = await getSessionSafe(5000);
+          session = (data as any)?.session ?? null;
+        } catch {
+          session = null;
+        }
 
       if (session?.user) {
         const { data: profile, error } = await supabase
@@ -122,8 +127,9 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
         }
       }
 
-      supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session?.user) {
+      if (!authSubscription) {
+        const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (session?.user) {
           // Force refresh if token is stale regarding role?
           // We just fetch profile again.
           
@@ -173,17 +179,25 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
           } else {
             set({ users: [] });
           }
-        } else {
-          set({ user: null, isAuthenticated: false, isLoading: false, users: [] });
-        }
-      });
+          } else {
+            set({ user: null, isAuthenticated: false, isLoading: false, users: [] });
+          }
+        });
 
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-      set({ user: null, isAuthenticated: false });
-    } finally {
-      set({ isLoading: false });
-    }
+        authSubscription = (data as any)?.subscription ?? null;
+      }
+
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        set({ user: null, isAuthenticated: false });
+      } finally {
+        set({ isLoading: false });
+      }
+    })().finally(() => {
+      initializeInFlight = null;
+    });
+
+    return initializeInFlight;
   },
 
   loginWithGoogle: async (redirect) => {

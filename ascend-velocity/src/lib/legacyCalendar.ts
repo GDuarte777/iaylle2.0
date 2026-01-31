@@ -180,7 +180,6 @@ window.marcarDia = function (day, status) {
     evaluateAchievementsFor(window.selectedAfiliada.id);
     const root = document.getElementById("legacy-calendar-root");
     if (root) root.innerHTML = window.renderCalendario!();
-    window.dispatchEvent(new Event('focus'));
   });
 };
 
